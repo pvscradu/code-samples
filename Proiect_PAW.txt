@@ -1,0 +1,2242 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Proiect_PAW
+{
+    public abstract class Directories :ICloneable, IComparable
+    {
+        private string location;
+
+        public string Location
+        {
+            get { return location; }
+            set { location = value; }
+        }
+        static private ArrayList directoryList = new ArrayList();
+
+        public static ArrayList DirectoryList
+        {
+            get { return Directories.directoryList; }
+            set { Directories.directoryList = value; }
+        }
+
+        public Directories(string location)
+        {
+            this.location = location;
+        }
+
+        object ICloneable.Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
+        public Directories Clone()
+        {
+            return (Directories)((ICloneable)this).Clone();
+        }
+
+        public int CompareTo(object obj)
+        {
+            return String.Compare(this.location, ((Directories)obj).location);
+        }
+
+        public object this[int index]
+        {
+            get
+            {
+                if (index >= 0 && index < directoryList.Count)
+                    return directoryList[index];
+                else return -1;
+            }
+        }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Proiect_PAW
+{
+    public partial class FileInfoWindow : Form
+    {
+        private VideoFile videoFile;
+
+        public FileInfoWindow(VideoFile videoFile)
+        {
+            InitializeComponent();
+            this.videoFile = videoFile;
+
+            fileNameTextBox.Text = videoFile.FileInfo.FullName.Split('\\')[videoFile.FileInfo.FullName.Split('\\').Length - 1];
+            pathTextBox.Text = videoFile.FileInfo.FullName.TrimEnd(fileNameTextBox.Text.ToCharArray());
+
+            if (videoFile.IsVisualized)
+                isVisualizedCheckBox.Checked = true;
+            else
+                isVisualizedCheckBox.Checked = false;
+
+            if (videoFile.DateOfVisualization.ToString().CompareTo("Hasn't been visualized yet.") == 0)
+            {
+                dateOfVisualizationPicker.Value = DateTime.Parse("01.01.1990");
+            }
+            else
+            {
+                dateOfVisualizationPicker.Value = DateTime.Parse(videoFile.DateOfVisualization);
+            }
+
+            genreTextBox.Text = videoFile.Genre.ToString();
+            personalRatingTextBox.Text = videoFile.PersonalRating.ToString();
+            IMDbRatingTextBox.Text = videoFile.IMDbRating.ToString();
+        }
+
+        private void saveButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dateOfVisualizationPicker.Value != DateTime.Parse("01.01.1990"))
+                    isVisualizedCheckBox.Checked = true;
+                else
+                    isVisualizedCheckBox.Checked = false;
+
+                foreach (VideoFile file in MainWindow.files)
+                {
+                    if (videoFile.FileInfo.FullName.CompareTo(file.FileInfo.FullName) == 0)
+                    {
+                        file.IsVisualized = isVisualizedCheckBox.Checked;
+
+                        if (dateOfVisualizationPicker.Value != DateTime.Parse("01.01.1990"))
+                            //file.DateOfVisualization = dateOfVisualizationPicker.Value.ToString();
+                            file.DateOfVisualization = dateOfVisualizationPicker.Value.ToShortDateString();
+                        else
+                            file.DateOfVisualization = "Hasn't been visualized yet.";
+
+                        file.Genre = genreTextBox.Text;
+
+                        if (dateOfVisualizationPicker.Value != DateTime.Parse("01.01.1990"))
+                            file.PersonalRating = Convert.ToDouble(personalRatingTextBox.Text);
+                        else
+                            file.PersonalRating = 5;
+
+                        file.IMDbRating = Convert.ToDouble(IMDbRatingTextBox.Text);
+
+                        if (file.PersonalRating < 0 || file.PersonalRating > 10
+                            || file.IMDbRating < 0 || file.IMDbRating > 10)
+                            throw new Exception();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error reading fields!", "Error", MessageBoxButtons.OK);
+            }
+        }
+
+        private void closeButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void playButton_Click(object sender, EventArgs e)
+        {
+            axWindowsMediaPlayer.openPlayer(videoFile.FileInfo.FullName);
+        }
+    }
+}
+
+namespace Proiect_PAW
+{
+    partial class FileInfoWindow
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FileInfoWindow));
+            this.fileNameTextBox = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.pathTextBox = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.genreTextBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.personalRatingTextBox = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.IMDbRatingTextBox = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.isVisualizedCheckBox = new System.Windows.Forms.CheckBox();
+            this.dateOfVisualizationPicker = new System.Windows.Forms.DateTimePicker();
+            this.saveButton = new System.Windows.Forms.Button();
+            this.closeButton = new System.Windows.Forms.Button();
+            this.playButton = new System.Windows.Forms.Button();
+            this.axWindowsMediaPlayer = new AxWMPLib.AxWindowsMediaPlayer();
+            ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // fileNameTextBox
+            // 
+            this.fileNameTextBox.Location = new System.Drawing.Point(140, 17);
+            this.fileNameTextBox.Name = "fileNameTextBox";
+            this.fileNameTextBox.ReadOnly = true;
+            this.fileNameTextBox.Size = new System.Drawing.Size(310, 26);
+            this.fileNameTextBox.TabIndex = 0;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(46, 20);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(82, 20);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "File name:";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(46, 117);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(85, 20);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Visualized:";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(85, 68);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(46, 20);
+            this.label3.TabIndex = 6;
+            this.label3.Text = "Path:";
+            // 
+            // pathTextBox
+            // 
+            this.pathTextBox.Location = new System.Drawing.Point(140, 65);
+            this.pathTextBox.Name = "pathTextBox";
+            this.pathTextBox.ReadOnly = true;
+            this.pathTextBox.Size = new System.Drawing.Size(310, 26);
+            this.pathTextBox.TabIndex = 5;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(24, 165);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(107, 20);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "Visualized on:";
+            // 
+            // genreTextBox
+            // 
+            this.genreTextBox.Location = new System.Drawing.Point(140, 208);
+            this.genreTextBox.Name = "genreTextBox";
+            this.genreTextBox.Size = new System.Drawing.Size(310, 26);
+            this.genreTextBox.TabIndex = 10;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(73, 211);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(58, 20);
+            this.label5.TabIndex = 9;
+            this.label5.Text = "Genre:";
+            // 
+            // personalRatingTextBox
+            // 
+            this.personalRatingTextBox.Location = new System.Drawing.Point(140, 256);
+            this.personalRatingTextBox.Name = "personalRatingTextBox";
+            this.personalRatingTextBox.Size = new System.Drawing.Size(310, 26);
+            this.personalRatingTextBox.TabIndex = 12;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(12, 256);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(119, 20);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "Personal rating:";
+            // 
+            // IMDbRatingTextBox
+            // 
+            this.IMDbRatingTextBox.Location = new System.Drawing.Point(140, 303);
+            this.IMDbRatingTextBox.Name = "IMDbRatingTextBox";
+            this.IMDbRatingTextBox.Size = new System.Drawing.Size(310, 26);
+            this.IMDbRatingTextBox.TabIndex = 14;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(38, 306);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(93, 20);
+            this.label7.TabIndex = 13;
+            this.label7.Text = "Imdb rating:";
+            // 
+            // isVisualizedCheckBox
+            // 
+            this.isVisualizedCheckBox.AutoSize = true;
+            this.isVisualizedCheckBox.Location = new System.Drawing.Point(140, 116);
+            this.isVisualizedCheckBox.Name = "isVisualizedCheckBox";
+            this.isVisualizedCheckBox.Size = new System.Drawing.Size(22, 21);
+            this.isVisualizedCheckBox.TabIndex = 15;
+            this.isVisualizedCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // dateOfVisualizationPicker
+            // 
+            this.dateOfVisualizationPicker.Location = new System.Drawing.Point(140, 160);
+            this.dateOfVisualizationPicker.Name = "dateOfVisualizationPicker";
+            this.dateOfVisualizationPicker.Size = new System.Drawing.Size(310, 26);
+            this.dateOfVisualizationPicker.TabIndex = 16;
+            // 
+            // saveButton
+            // 
+            this.saveButton.Location = new System.Drawing.Point(140, 359);
+            this.saveButton.Name = "saveButton";
+            this.saveButton.Size = new System.Drawing.Size(207, 48);
+            this.saveButton.TabIndex = 17;
+            this.saveButton.Text = "Save";
+            this.saveButton.UseVisualStyleBackColor = true;
+            this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
+            // 
+            // closeButton
+            // 
+            this.closeButton.Location = new System.Drawing.Point(140, 467);
+            this.closeButton.Name = "closeButton";
+            this.closeButton.Size = new System.Drawing.Size(207, 48);
+            this.closeButton.TabIndex = 18;
+            this.closeButton.Text = "Close";
+            this.closeButton.UseVisualStyleBackColor = true;
+            this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
+            // 
+            // playButton
+            // 
+            this.playButton.Location = new System.Drawing.Point(140, 413);
+            this.playButton.Name = "playButton";
+            this.playButton.Size = new System.Drawing.Size(207, 48);
+            this.playButton.TabIndex = 19;
+            this.playButton.Text = "Play";
+            this.playButton.UseVisualStyleBackColor = true;
+            this.playButton.Click += new System.EventHandler(this.playButton_Click);
+            // 
+            // axWindowsMediaPlayer
+            // 
+            this.axWindowsMediaPlayer.Enabled = true;
+            this.axWindowsMediaPlayer.Location = new System.Drawing.Point(140, 575);
+            this.axWindowsMediaPlayer.Name = "axWindowsMediaPlayer";
+            this.axWindowsMediaPlayer.OcxState = ((System.Windows.Forms.AxHost.State)(resources.GetObject("axWindowsMediaPlayer.OcxState")));
+            this.axWindowsMediaPlayer.Size = new System.Drawing.Size(207, 48);
+            this.axWindowsMediaPlayer.TabIndex = 20;
+            this.axWindowsMediaPlayer.Visible = false;
+            // 
+            // FileInfoWindow
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(534, 702);
+            this.Controls.Add(this.axWindowsMediaPlayer);
+            this.Controls.Add(this.playButton);
+            this.Controls.Add(this.closeButton);
+            this.Controls.Add(this.saveButton);
+            this.Controls.Add(this.dateOfVisualizationPicker);
+            this.Controls.Add(this.isVisualizedCheckBox);
+            this.Controls.Add(this.IMDbRatingTextBox);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.personalRatingTextBox);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.genreTextBox);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.pathTextBox);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.fileNameTextBox);
+            this.Name = "FileInfoWindow";
+            this.Text = "FileInfo";
+            ((System.ComponentModel.ISupportInitialize)(this.axWindowsMediaPlayer)).EndInit();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.TextBox fileNameTextBox;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox pathTextBox;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox genreTextBox;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox personalRatingTextBox;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox IMDbRatingTextBox;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.CheckBox isVisualizedCheckBox;
+        private System.Windows.Forms.DateTimePicker dateOfVisualizationPicker;
+        private System.Windows.Forms.Button saveButton;
+        private System.Windows.Forms.Button closeButton;
+        private System.Windows.Forms.Button playButton;
+        private AxWMPLib.AxWindowsMediaPlayer axWindowsMediaPlayer;
+
+    }
+}
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Proiect_PAW
+{
+    interface INumberOfFiles
+    {
+        int numberOfFiles(ArrayList videoFiles);
+    }
+}
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.OleDb;
+using System.Drawing;
+using System.Drawing.Printing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml;
+using System.Xml.Linq;
+
+namespace Proiect_PAW
+{
+    public partial class MainWindow : Form
+    {
+        public static ArrayList files = new ArrayList();
+
+        private string[] videoFormats = { ".avi", ".mov", ".flv", ".mpg", ".mpeg", ".mp4" };
+
+        private string Provider;
+        
+        public MainWindow()
+        {
+            InitializeComponent();
+            this.Provider = "Provider = Microsoft.ACE.OLEDB.12.0; Data Source = files.accdb";
+        }
+
+        private void InitializeListView()
+        {
+            directoryList.Items.Clear();
+
+            foreach (VideoFile file in files)
+            {
+                ListViewItem item = new ListViewItem(file.FileInfo.FullName);
+                item.SubItems.Add(file.IsVisualized.ToString());
+                item.SubItems.Add(file.DateOfVisualization.ToString());
+                item.SubItems.Add(file.Genre.ToString());
+                item.SubItems.Add(file.PersonalRating.ToString());
+                item.SubItems.Add(file.IMDbRating.ToString());
+                directoryList.Items.Add(item);
+            }
+        }
+
+        private void InitializeTreeView()
+        {
+            try
+            {
+                FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+                DialogResult = folderBrowserDialog.ShowDialog();
+
+                if (DialogResult != DialogResult.Cancel)
+                {
+                    if (isNewRootFolder(folderBrowserDialog.SelectedPath))
+                    {
+                        TreeNode root = new TreeNode(folderBrowserDialog.SelectedPath);
+                        directoryTree.Nodes.Add(root);
+                        processDirectory(folderBrowserDialog.SelectedPath, root);
+                    }
+                    else
+                    {
+                        DialogResult = MessageBox.Show("Directory already selected!", "Warning", MessageBoxButtons.RetryCancel);
+                        if (DialogResult == DialogResult.Retry)
+                            InitializeTreeView();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                DialogResult result = MessageBox.Show(e.Message, "Error", MessageBoxButtons.RetryCancel);
+                if (result == DialogResult.Retry)
+                    InitializeTreeView();
+            }
+        }
+
+        private bool isNewRootFolder(string selectedPath)
+        {
+            foreach (TreeNode treeNode in directoryTree.Nodes)
+                if (String.Compare(treeNode.Text, selectedPath) == 0)
+                    return false;
+            return true;
+        }
+
+        private void processDirectory(string selectedDirectory, TreeNode currentLevel)
+        {
+            try
+            {
+                string[] fileEntries = Directory.GetFiles(selectedDirectory);
+                foreach (string fileName in fileEntries)
+                    processFile(fileName, currentLevel);
+
+                string[] directoryEntries = Directory.GetDirectories(selectedDirectory);
+                foreach (string subdirectory in directoryEntries)
+                {
+                    TreeNode nextLevel = new TreeNode(subdirectory);
+                    currentLevel.Nodes.Add(nextLevel);
+
+                    processDirectory(subdirectory, nextLevel);
+                }
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+            }
+        }
+
+        private void processFile(string fileName, TreeNode parent)
+        {
+            try
+            {
+                foreach(string videoFormat in videoFormats)
+                    if (fileName.EndsWith(videoFormat))
+                        processVideoFile(fileName);
+                parent.Nodes.Add(new TreeNode(fileName));
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+            }
+        }
+
+        private void processVideoFile(string fileName)
+        {
+            files.Add(new VideoFile(new FileInfo(fileName)));
+        }
+
+        private void processVideoFile(string fileName, bool isVisualized, string dateOfVisualization, string genre, double personalRating, double imdbRating)
+        {
+            files.Add(new VideoFile(new FileInfo(fileName), isVisualized, dateOfVisualization, genre, personalRating, imdbRating));
+        }
+
+        private void addDirectoryButton_Click(object sender, EventArgs e)
+        {
+            InitializeTreeView();
+            InitializeListView();
+        }
+
+        private void directoryTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            foreach (VideoFile file in files)
+            {
+                if (String.Compare(file.FileInfo.FullName, directoryTree.SelectedNode.Text) == 0)
+                {
+                    new FileInfoWindow(file).ShowDialog();
+                }
+            }
+        }
+
+        private void exportButton_Click(object sender, EventArgs e)
+        {
+            MemoryStream memoryStream = new MemoryStream();
+            XmlTextWriter writer = new XmlTextWriter(memoryStream, Encoding.UTF8);
+            writer.Formatting = Formatting.Indented;
+
+            writer.WriteStartDocument();
+            writer.WriteStartElement("Root");
+            foreach (TreeNode directory in directoryTree.Nodes)
+            {
+                writer.WriteStartElement(directory.Text.Split('\\')[directory.Text.Split('\\').Length - 1]);
+                foreach (TreeNode subDirectory in directory.Nodes)
+                {
+                    if(subDirectory.Nodes.Count > 0) 
+                    {
+                        writer.WriteStartElement(subDirectory.Text.Split('\\')[subDirectory.Text.Split('\\').Length - 1]);
+                        writer.WriteEndElement();
+                    }
+                }
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+            writer.Close();
+
+            string xml = Encoding.UTF8.GetString(memoryStream.ToArray());
+            memoryStream.Close();
+            StreamWriter sw = new StreamWriter("file.xml");
+            sw.WriteLine(xml);
+            sw.Close();
+            MessageBox.Show("Export successful", "Succes", MessageBoxButtons.OK);
+        }
+
+        private void editButton_Click(object sender, EventArgs e)
+        {
+            directoryList_DoubleClick(sender, e);
+        }
+
+        private void removeDirectoryButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                ArrayList newFiles = new ArrayList();
+
+                foreach (VideoFile file in files)
+                {
+                    if(directoryTree.SelectedNode.Text.Length < file.FileInfo.FullName.Length)
+                        if (directoryTree.SelectedNode.Text.CompareTo(file.FileInfo.FullName.Remove(directoryTree.SelectedNode.Text.Length)) != 0)
+                            newFiles.Add(file);
+                }
+                files.Clear();
+                files = newFiles;
+
+                directoryTree.SelectedNode.Remove();
+
+                InitializeListView();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("No directory selected!", "Error", MessageBoxButtons.OK);
+            }
+        }
+
+        private void removeDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            removeDirectoryButton_Click(sender, e);
+        }
+
+        private void directoryList_DoubleClick(object sender, EventArgs e)
+        {
+            foreach (ListViewItem listViewItem in directoryList.Items)
+                if (listViewItem.Selected)
+                    foreach (VideoFile videoFile in files)
+                        if (videoFile.FileInfo.FullName.CompareTo(listViewItem.Text) == 0)
+                        {
+                            new FileInfoWindow(videoFile).ShowDialog();
+                            refreshToolStripMenuItem_Click(sender, e);
+                        }                   
+        }
+
+        private void searchButton_Click(object sender, EventArgs e)
+        {
+            new SearchWindow(files).ShowDialog();
+            InitializeListView();
+        }
+
+        private void databaseExport_Click(object sender, EventArgs e)
+        {
+            OleDbConnection connection = new OleDbConnection(Provider);
+            OleDbCommand command = new OleDbCommand("INSERT INTO files VALUES(?, ?, ?, ?, ?, ?)", connection);
+
+            try
+            {
+                connection.Open();
+
+                foreach (ListViewItem listViewItem in directoryList.Items)
+                {
+                    command.Parameters.Clear();
+
+                    command.Parameters.Add("video", OleDbType.Char, 250).Value = listViewItem.SubItems[0].Text;
+                    command.Parameters.Add("visualized", OleDbType.Boolean).Value = listViewItem.SubItems[1].Text;
+                    command.Parameters.Add("dateOfVisualization", OleDbType.Char, 50).Value = listViewItem.SubItems[2].Text;
+                    command.Parameters.Add("genre", OleDbType.Char, 10).Value = listViewItem.SubItems[3].Text;
+                    command.Parameters.Add("personalRating", OleDbType.Integer).Value = listViewItem.SubItems[4].Text;
+                    command.Parameters.Add("IMDbRating", OleDbType.Integer).Value = listViewItem.SubItems[5].Text;
+                    command.ExecuteNonQuery();
+                }
+
+                MessageBox.Show("Export successful!", "Succes", MessageBoxButtons.OK);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        private void databaseDelete_Click(object sender, EventArgs e)
+        {
+            DialogResult = MessageBox.Show("Are you sure you want to remove all the entries from the database?", "Warning", MessageBoxButtons.YesNo);
+            if (DialogResult == DialogResult.Yes)
+            {
+                OleDbConnection connection = new OleDbConnection(Provider);
+                OleDbCommand command = new OleDbCommand("DELETE FROM files", connection);
+                try
+                {
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                    files.Clear();
+                    directoryList.Items.Clear();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    connection.Close();
+                    MessageBox.Show("All entries removed!", "Succes", MessageBoxButtons.OK);
+                }
+            }
+        }
+
+        private void databaseUpdateButton_Click(object sender, EventArgs e)
+        {
+            OleDbConnection connection = new OleDbConnection(Provider);
+            OleDbCommand command = new OleDbCommand(
+                "UPDATE files " + 
+                "SET visualized = ?, dateOfVisualization = ?, genre = ?, personalRating = ?, IMDbRating = ?" +
+                "WHERE video = ?", connection);
+
+            try
+            {
+                connection.Open();
+
+                foreach (ListViewItem listViewItem in directoryList.Items)
+                {
+                    command.Parameters.Clear();
+                    command.Parameters.Add("visualized", OleDbType.Boolean).Value = listViewItem.SubItems[1].Text;
+                    command.Parameters.Add("dateOfVisualization", OleDbType.Char, 50).Value = listViewItem.SubItems[2].Text;
+                    command.Parameters.Add("genre", OleDbType.Char, 10).Value = listViewItem.SubItems[3].Text;
+                    command.Parameters.Add("personalRating", OleDbType.Integer).Value = listViewItem.SubItems[4].Text;
+                    command.Parameters.Add("IMDbRating", OleDbType.Integer).Value = listViewItem.SubItems[5].Text;
+                    command.Parameters.Add("video", OleDbType.Char, 250).Value = listViewItem.SubItems[0].Text;
+                    command.ExecuteNonQuery();
+                }
+
+                MessageBox.Show("Database updated!", "Succes", MessageBoxButtons.OK);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        private void databaseImportButton_Click(object sender, EventArgs e)
+        {
+            OleDbConnection connection = new OleDbConnection(Provider);
+            OleDbCommand command = new OleDbCommand("SELECT * FROM files", connection);
+            try
+            {
+                connection.Open();
+                OleDbDataReader reader = command.ExecuteReader();
+                directoryList.Items.Clear();
+                files.Clear();
+
+                string fileName = "";
+                bool isVisualized = false;
+                string dateOfVisualization = "";
+                string genre = "";
+                double personalRating = 5;
+                double imdbRating = 5;
+
+                while (reader.Read())
+                {
+                    ListViewItem listViewItem = new ListViewItem(reader["video"].ToString());
+                    listViewItem.SubItems.Add(reader["visualized"].ToString());
+                    listViewItem.SubItems.Add(reader["dateOfVisualization"].ToString());
+                    listViewItem.SubItems.Add(reader["genre"].ToString());
+                    listViewItem.SubItems.Add(reader["personalRating"].ToString());
+                    listViewItem.SubItems.Add(reader["IMDbRating"].ToString());
+                    directoryList.Items.Add(listViewItem);
+
+                    fileName = reader["video"].ToString();
+                    if (reader["dateOfVisualization"].ToString().CompareTo("Hasn't been visualized yet.") == 0)
+                        isVisualized = false;
+                    else isVisualized = true;
+                    dateOfVisualization = reader["dateOfVisualization"].ToString();
+                    genre = reader["genre"].ToString();
+                    try
+                    {
+                        personalRating = Convert.ToDouble(reader["personalRating"].ToString());
+                        imdbRating = Convert.ToDouble(reader["IMDbRating"].ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK);
+                    }
+                    processVideoFile(fileName, isVisualized, dateOfVisualization, genre, personalRating, imdbRating);
+                }
+                reader.Close();
+
+                MessageBox.Show("Import successful!", "Succes", MessageBoxButtons.OK);
+            }
+            catch (OleDbException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        private void addToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            addDirectoryButton_Click(sender, e);
+        }
+
+        private void removeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            removeDirectoryButton_Click(sender, e);
+        }
+
+        private void exportXMLFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            exportButton_Click(sender, e);
+        }
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            editButton_Click(sender, e);
+        }
+
+        private void refreshToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            InitializeListView();
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            directoryList.Items.Clear();
+            files.Clear();
+        }
+
+        private void reloadToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            processDirectory(directoryTree.SelectedNode.Text, directoryTree.SelectedNode);
+            InitializeListView();
+        }
+
+        private void deleteItemsButton_Click(object sender, EventArgs e)
+        {
+            OleDbConnection connection = new OleDbConnection(Provider);
+            OleDbCommand command = new OleDbCommand("DELETE FROM files WHERE video = ?", connection);
+
+            try
+            {
+                connection.Open();
+                foreach (ListViewItem item in directoryList.Items)
+                    if (item.Checked == true)
+                    {
+                        command.Parameters.Clear();
+                        command.Parameters.Add("video", OleDbType.Char, 250).Value = item.Text;
+                        command.ExecuteNonQuery();
+                    }
+
+                MessageBox.Show("Items deleted!", "Succes", MessageBoxButtons.OK);
+                databaseImportButton_Click(sender, e);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        private void directoryTree_MouseDown(object sender, MouseEventArgs e)
+        {
+            if(directoryTree.SelectedNode != null)
+                directoryTree.DoDragDrop(directoryTree.SelectedNode.Text, DragDropEffects.Copy | DragDropEffects.Move);
+        }
+
+        private void directoryList_DragEnter(object sender, DragEventArgs e)
+        {
+            e.Effect = DragDropEffects.None;
+            if ((e.KeyState & 8) == 8 && (e.AllowedEffect & DragDropEffects.Copy) == DragDropEffects.Copy)
+                e.Effect = DragDropEffects.Copy;
+            else
+                if ((e.AllowedEffect & DragDropEffects.Move) == DragDropEffects.Move)
+                    e.Effect = DragDropEffects.Move;
+        }
+
+        private void directoryList_DragDrop(object sender, DragEventArgs e)
+        {
+            reloadToolStripMenuItem_Click(sender, e);
+        }
+    }
+}
+
+namespace Proiect_PAW
+{
+    partial class MainWindow
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
+            this.directoryTree = new System.Windows.Forms.TreeView();
+            this.contextMenuStripTreeView = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.addToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.reloadToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.directoryList = new System.Windows.Forms.ListView();
+            this.video = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.visualized = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.dateOfVisualization = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.genre = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.personalRating = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.IMDbRating = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenuStripListView = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.exportXMLFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.refreshToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addDirectoryButton = new System.Windows.Forms.Button();
+            this.exportButton = new System.Windows.Forms.Button();
+            this.editButton = new System.Windows.Forms.Button();
+            this.removeDirectoryButton = new System.Windows.Forms.Button();
+            this.searchButton = new System.Windows.Forms.Button();
+            this.databaseExportButton = new System.Windows.Forms.Button();
+            this.databaseDeleteButton = new System.Windows.Forms.Button();
+            this.databaseUpdateButton = new System.Windows.Forms.Button();
+            this.databaseImportButton = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
+            this.deleteItemsButton = new System.Windows.Forms.Button();
+            this.printDocument = new System.Drawing.Printing.PrintDocument();
+            this.printPreviewDialog = new System.Windows.Forms.PrintPreviewDialog();
+            this.contextMenuStripTreeView.SuspendLayout();
+            this.contextMenuStripListView.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // directoryTree
+            // 
+            this.directoryTree.ContextMenuStrip = this.contextMenuStripTreeView;
+            this.directoryTree.Location = new System.Drawing.Point(161, 13);
+            this.directoryTree.Name = "directoryTree";
+            this.directoryTree.Size = new System.Drawing.Size(583, 836);
+            this.directoryTree.TabIndex = 1;
+            this.directoryTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.directoryTree_AfterSelect);
+            this.directoryTree.MouseDown += new System.Windows.Forms.MouseEventHandler(this.directoryTree_MouseDown);
+            // 
+            // contextMenuStripTreeView
+            // 
+            this.contextMenuStripTreeView.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.contextMenuStripTreeView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addToolStripMenuItem1,
+            this.removeToolStripMenuItem1,
+            this.reloadToolStripMenuItem});
+            this.contextMenuStripTreeView.Name = "directoryListContextMenuStrip";
+            this.contextMenuStripTreeView.Size = new System.Drawing.Size(149, 94);
+            // 
+            // addToolStripMenuItem1
+            // 
+            this.addToolStripMenuItem1.Name = "addToolStripMenuItem1";
+            this.addToolStripMenuItem1.Size = new System.Drawing.Size(148, 30);
+            this.addToolStripMenuItem1.Text = "Add";
+            this.addToolStripMenuItem1.Click += new System.EventHandler(this.addToolStripMenuItem_Click);
+            // 
+            // removeToolStripMenuItem1
+            // 
+            this.removeToolStripMenuItem1.Name = "removeToolStripMenuItem1";
+            this.removeToolStripMenuItem1.Size = new System.Drawing.Size(148, 30);
+            this.removeToolStripMenuItem1.Text = "Remove";
+            this.removeToolStripMenuItem1.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+            // 
+            // reloadToolStripMenuItem
+            // 
+            this.reloadToolStripMenuItem.Name = "reloadToolStripMenuItem";
+            this.reloadToolStripMenuItem.Size = new System.Drawing.Size(148, 30);
+            this.reloadToolStripMenuItem.Text = "Reload";
+            this.reloadToolStripMenuItem.Click += new System.EventHandler(this.reloadToolStripMenuItem_Click);
+            // 
+            // directoryList
+            // 
+            this.directoryList.AllowDrop = true;
+            this.directoryList.CheckBoxes = true;
+            this.directoryList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.video,
+            this.visualized,
+            this.dateOfVisualization,
+            this.genre,
+            this.personalRating,
+            this.IMDbRating});
+            this.directoryList.ContextMenuStrip = this.contextMenuStripListView;
+            this.directoryList.FullRowSelect = true;
+            this.directoryList.GridLines = true;
+            this.directoryList.Location = new System.Drawing.Point(751, 13);
+            this.directoryList.MultiSelect = false;
+            this.directoryList.Name = "directoryList";
+            this.directoryList.Size = new System.Drawing.Size(584, 836);
+            this.directoryList.TabIndex = 2;
+            this.directoryList.UseCompatibleStateImageBehavior = false;
+            this.directoryList.View = System.Windows.Forms.View.Details;
+            this.directoryList.DragDrop += new System.Windows.Forms.DragEventHandler(this.directoryList_DragDrop);
+            this.directoryList.DragEnter += new System.Windows.Forms.DragEventHandler(this.directoryList_DragEnter);
+            this.directoryList.DoubleClick += new System.EventHandler(this.directoryList_DoubleClick);
+            // 
+            // video
+            // 
+            this.video.Text = "Video";
+            this.video.Width = 133;
+            // 
+            // visualized
+            // 
+            this.visualized.Text = "Visualized";
+            this.visualized.Width = 89;
+            // 
+            // dateOfVisualization
+            // 
+            this.dateOfVisualization.Text = "Date of Visualization";
+            this.dateOfVisualization.Width = 159;
+            // 
+            // genre
+            // 
+            this.genre.Text = "Genre";
+            this.genre.Width = 61;
+            // 
+            // personalRating
+            // 
+            this.personalRating.Text = "Personal Rating";
+            this.personalRating.Width = 129;
+            // 
+            // IMDbRating
+            // 
+            this.IMDbRating.Text = "IMDb Rating";
+            this.IMDbRating.Width = 105;
+            // 
+            // contextMenuStripListView
+            // 
+            this.contextMenuStripListView.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.contextMenuStripListView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportXMLFileToolStripMenuItem,
+            this.editToolStripMenuItem,
+            this.refreshToolStripMenuItem,
+            this.clearToolStripMenuItem});
+            this.contextMenuStripListView.Name = "contextMenuStripListView";
+            this.contextMenuStripListView.Size = new System.Drawing.Size(207, 124);
+            // 
+            // exportXMLFileToolStripMenuItem
+            // 
+            this.exportXMLFileToolStripMenuItem.Name = "exportXMLFileToolStripMenuItem";
+            this.exportXMLFileToolStripMenuItem.Size = new System.Drawing.Size(206, 30);
+            this.exportXMLFileToolStripMenuItem.Text = "Export XML File";
+            this.exportXMLFileToolStripMenuItem.Click += new System.EventHandler(this.exportXMLFileToolStripMenuItem_Click);
+            // 
+            // editToolStripMenuItem
+            // 
+            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(206, 30);
+            this.editToolStripMenuItem.Text = "Edit";
+            this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
+            // 
+            // refreshToolStripMenuItem
+            // 
+            this.refreshToolStripMenuItem.Name = "refreshToolStripMenuItem";
+            this.refreshToolStripMenuItem.Size = new System.Drawing.Size(206, 30);
+            this.refreshToolStripMenuItem.Text = "Refresh";
+            this.refreshToolStripMenuItem.Click += new System.EventHandler(this.refreshToolStripMenuItem_Click);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(206, 30);
+            this.clearToolStripMenuItem.Text = "Clear";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            // 
+            // addDirectoryButton
+            // 
+            this.addDirectoryButton.Location = new System.Drawing.Point(12, 36);
+            this.addDirectoryButton.Name = "addDirectoryButton";
+            this.addDirectoryButton.Size = new System.Drawing.Size(142, 59);
+            this.addDirectoryButton.TabIndex = 3;
+            this.addDirectoryButton.Text = "Add";
+            this.addDirectoryButton.UseVisualStyleBackColor = true;
+            this.addDirectoryButton.Click += new System.EventHandler(this.addDirectoryButton_Click);
+            // 
+            // exportButton
+            // 
+            this.exportButton.Location = new System.Drawing.Point(12, 192);
+            this.exportButton.Name = "exportButton";
+            this.exportButton.Size = new System.Drawing.Size(142, 59);
+            this.exportButton.TabIndex = 4;
+            this.exportButton.Text = "Export XML File";
+            this.exportButton.UseVisualStyleBackColor = true;
+            this.exportButton.Click += new System.EventHandler(this.exportButton_Click);
+            // 
+            // editButton
+            // 
+            this.editButton.Location = new System.Drawing.Point(12, 257);
+            this.editButton.Name = "editButton";
+            this.editButton.Size = new System.Drawing.Size(142, 59);
+            this.editButton.TabIndex = 5;
+            this.editButton.Text = "Edit";
+            this.editButton.UseVisualStyleBackColor = true;
+            this.editButton.Click += new System.EventHandler(this.editButton_Click);
+            // 
+            // removeDirectoryButton
+            // 
+            this.removeDirectoryButton.Location = new System.Drawing.Point(12, 101);
+            this.removeDirectoryButton.Name = "removeDirectoryButton";
+            this.removeDirectoryButton.Size = new System.Drawing.Size(142, 59);
+            this.removeDirectoryButton.TabIndex = 6;
+            this.removeDirectoryButton.Text = "Remove";
+            this.removeDirectoryButton.UseVisualStyleBackColor = true;
+            this.removeDirectoryButton.Click += new System.EventHandler(this.removeDirectoryButton_Click);
+            // 
+            // searchButton
+            // 
+            this.searchButton.Location = new System.Drawing.Point(12, 322);
+            this.searchButton.Name = "searchButton";
+            this.searchButton.Size = new System.Drawing.Size(142, 59);
+            this.searchButton.TabIndex = 7;
+            this.searchButton.Text = "Search";
+            this.searchButton.UseVisualStyleBackColor = true;
+            this.searchButton.Click += new System.EventHandler(this.searchButton_Click);
+            // 
+            // databaseExportButton
+            // 
+            this.databaseExportButton.Location = new System.Drawing.Point(12, 411);
+            this.databaseExportButton.Name = "databaseExportButton";
+            this.databaseExportButton.Size = new System.Drawing.Size(142, 59);
+            this.databaseExportButton.TabIndex = 8;
+            this.databaseExportButton.Text = "Export";
+            this.databaseExportButton.UseVisualStyleBackColor = true;
+            this.databaseExportButton.Click += new System.EventHandler(this.databaseExport_Click);
+            // 
+            // databaseDeleteButton
+            // 
+            this.databaseDeleteButton.Location = new System.Drawing.Point(12, 671);
+            this.databaseDeleteButton.Name = "databaseDeleteButton";
+            this.databaseDeleteButton.Size = new System.Drawing.Size(142, 59);
+            this.databaseDeleteButton.TabIndex = 9;
+            this.databaseDeleteButton.Text = "Delete All";
+            this.databaseDeleteButton.UseVisualStyleBackColor = true;
+            this.databaseDeleteButton.Click += new System.EventHandler(this.databaseDelete_Click);
+            // 
+            // databaseUpdateButton
+            // 
+            this.databaseUpdateButton.Location = new System.Drawing.Point(12, 541);
+            this.databaseUpdateButton.Name = "databaseUpdateButton";
+            this.databaseUpdateButton.Size = new System.Drawing.Size(142, 59);
+            this.databaseUpdateButton.TabIndex = 10;
+            this.databaseUpdateButton.Text = "Update";
+            this.databaseUpdateButton.UseVisualStyleBackColor = true;
+            this.databaseUpdateButton.Click += new System.EventHandler(this.databaseUpdateButton_Click);
+            // 
+            // databaseImportButton
+            // 
+            this.databaseImportButton.Location = new System.Drawing.Point(12, 476);
+            this.databaseImportButton.Name = "databaseImportButton";
+            this.databaseImportButton.Size = new System.Drawing.Size(142, 59);
+            this.databaseImportButton.TabIndex = 11;
+            this.databaseImportButton.Text = "Import";
+            this.databaseImportButton.UseVisualStyleBackColor = true;
+            this.databaseImportButton.Click += new System.EventHandler(this.databaseImportButton_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 13);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(72, 20);
+            this.label1.TabIndex = 12;
+            this.label1.Text = "Directory";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 169);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(64, 20);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "Options";
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 388);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(79, 20);
+            this.label3.TabIndex = 14;
+            this.label3.Text = "Database";
+            // 
+            // deleteItemsButton
+            // 
+            this.deleteItemsButton.Location = new System.Drawing.Point(12, 606);
+            this.deleteItemsButton.Name = "deleteItemsButton";
+            this.deleteItemsButton.Size = new System.Drawing.Size(142, 59);
+            this.deleteItemsButton.TabIndex = 15;
+            this.deleteItemsButton.Text = "Delete Item(s)";
+            this.deleteItemsButton.UseVisualStyleBackColor = true;
+            this.deleteItemsButton.Click += new System.EventHandler(this.deleteItemsButton_Click);
+            // 
+            // printPreviewDialog
+            // 
+            this.printPreviewDialog.AutoScrollMargin = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog.AutoScrollMinSize = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog.ClientSize = new System.Drawing.Size(400, 300);
+            this.printPreviewDialog.Enabled = true;
+            this.printPreviewDialog.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialog.Icon")));
+            this.printPreviewDialog.Name = "printPreviewDialog";
+            this.printPreviewDialog.Visible = false;
+            // 
+            // MainWindow
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1349, 855);
+            this.Controls.Add(this.deleteItemsButton);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.databaseImportButton);
+            this.Controls.Add(this.databaseUpdateButton);
+            this.Controls.Add(this.databaseDeleteButton);
+            this.Controls.Add(this.databaseExportButton);
+            this.Controls.Add(this.searchButton);
+            this.Controls.Add(this.removeDirectoryButton);
+            this.Controls.Add(this.editButton);
+            this.Controls.Add(this.exportButton);
+            this.Controls.Add(this.addDirectoryButton);
+            this.Controls.Add(this.directoryList);
+            this.Controls.Add(this.directoryTree);
+            this.Name = "MainWindow";
+            this.Text = "VideoManager 1.0";
+            this.contextMenuStripTreeView.ResumeLayout(false);
+            this.contextMenuStripListView.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.TreeView directoryTree;
+        private System.Windows.Forms.Button addDirectoryButton;
+        private System.Windows.Forms.ColumnHeader video;
+        private System.Windows.Forms.ColumnHeader visualized;
+        private System.Windows.Forms.ColumnHeader dateOfVisualization;
+        private System.Windows.Forms.ColumnHeader genre;
+        private System.Windows.Forms.ColumnHeader personalRating;
+        private System.Windows.Forms.ColumnHeader IMDbRating;
+        private System.Windows.Forms.ListView directoryList;
+        private System.Windows.Forms.Button exportButton;
+        private System.Windows.Forms.Button editButton;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripTreeView;
+        private System.Windows.Forms.Button removeDirectoryButton;
+        private System.Windows.Forms.Button searchButton;
+        private System.Windows.Forms.Button databaseExportButton;
+        private System.Windows.Forms.Button databaseDeleteButton;
+        private System.Windows.Forms.Button databaseUpdateButton;
+        private System.Windows.Forms.Button databaseImportButton;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStripListView;
+        private System.Windows.Forms.ToolStripMenuItem addToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem exportXMLFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem refreshToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem reloadToolStripMenuItem;
+        private System.Windows.Forms.Button deleteItemsButton;
+        private System.Drawing.Printing.PrintDocument printDocument;
+        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog;
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Proiect_PAW
+{
+    static class Program
+    {
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new MainWindow());
+        }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Proiect_PAW
+{
+    public partial class SearchRatingWindow : Form
+    {
+        private double rating;
+
+        public double Rating
+        {
+            get { return rating; }
+            set { rating = value; }
+        }
+
+        public SearchRatingWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void okButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                this.rating = Convert.ToDouble(ratingTextBox.Text);
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Invalid Rating!", "Error", MessageBoxButtons.OK);
+            }
+        }
+    }
+}
+
+namespace Proiect_PAW
+{
+    partial class SearchRatingWindow
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.ratingTextBox = new System.Windows.Forms.TextBox();
+            this.okButton = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // ratingTextBox
+            // 
+            this.ratingTextBox.Location = new System.Drawing.Point(12, 12);
+            this.ratingTextBox.Name = "ratingTextBox";
+            this.ratingTextBox.Size = new System.Drawing.Size(254, 26);
+            this.ratingTextBox.TabIndex = 0;
+            // 
+            // okButton
+            // 
+            this.okButton.Location = new System.Drawing.Point(54, 57);
+            this.okButton.Name = "okButton";
+            this.okButton.Size = new System.Drawing.Size(158, 42);
+            this.okButton.TabIndex = 1;
+            this.okButton.Text = "OK";
+            this.okButton.UseVisualStyleBackColor = true;
+            this.okButton.Click += new System.EventHandler(this.okButton_Click);
+            // 
+            // SearchRatingWindow
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(278, 115);
+            this.Controls.Add(this.okButton);
+            this.Controls.Add(this.ratingTextBox);
+            this.Name = "SearchRatingWindow";
+            this.Text = "SearchRatingWindow";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.TextBox ratingTextBox;
+        private System.Windows.Forms.Button okButton;
+    }
+}
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Proiect_PAW
+{
+    public partial class SearchResultsWindow : Form
+    {
+        ArrayList files;
+
+        public SearchResultsWindow(ArrayList files)
+        {
+            InitializeComponent();
+            this.files = files;
+            InitializeListView();
+        }
+
+        private void InitializeListView()
+        {
+            directoryList.Items.Clear();
+
+            foreach (VideoFile file in files)
+            {
+                ListViewItem item = new ListViewItem(file.FileInfo.FullName);
+                item.SubItems.Add(file.IsVisualized.ToString());
+                item.SubItems.Add(file.DateOfVisualization.ToString());
+                item.SubItems.Add(file.Genre.ToString());
+                item.SubItems.Add(file.PersonalRating.ToString());
+                item.SubItems.Add(file.IMDbRating.ToString());
+                directoryList.Items.Add(item);
+            }
+        }
+
+        private void directoryList_DoubleClick(object sender, EventArgs e)
+        {
+            foreach (ListViewItem listViewItem in directoryList.Items)
+                if (listViewItem.Selected)
+                    foreach (VideoFile videoFile in files)
+                        if (videoFile.FileInfo.FullName.CompareTo(listViewItem.Text) == 0)
+                        {
+                            new FileInfoWindow(videoFile).ShowDialog();
+                            InitializeListView();
+                        }
+        }
+
+        private void editToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            directoryList_DoubleClick(sender, e);
+        }
+
+        private void printDocument_PrintPage(object sender, System.Drawing.Printing.PrintPageEventArgs e)
+        {
+            string printOutput = "";
+            foreach (VideoFile file in files)
+                printOutput += file.ToString();
+            e.Graphics.DrawString(printOutput, new Font("Arial", 10, FontStyle.Regular), Brushes.Black, 25, 25);
+        }
+
+        private void SearchResultsWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult = MessageBox.Show("Do you want to save the results?", "Save", MessageBoxButtons.YesNo);
+            if (DialogResult == DialogResult.Yes)
+            {
+                printPreviewDialog.Document = printDocument;
+                printPreviewDialog.ShowDialog();
+            }   
+        }
+    }
+}
+
+namespace Proiect_PAW
+{
+    partial class SearchResultsWindow
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SearchResultsWindow));
+            this.directoryList = new System.Windows.Forms.ListView();
+            this.video = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.visualized = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.dateOfVisualization = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.genre = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.personalRating = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.IMDbRating = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.printPreviewDialog = new System.Windows.Forms.PrintPreviewDialog();
+            this.printDocument = new System.Drawing.Printing.PrintDocument();
+            this.contextMenuStrip.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // directoryList
+            // 
+            this.directoryList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.video,
+            this.visualized,
+            this.dateOfVisualization,
+            this.genre,
+            this.personalRating,
+            this.IMDbRating});
+            this.directoryList.ContextMenuStrip = this.contextMenuStrip;
+            this.directoryList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.directoryList.FullRowSelect = true;
+            this.directoryList.GridLines = true;
+            this.directoryList.Location = new System.Drawing.Point(0, 0);
+            this.directoryList.MultiSelect = false;
+            this.directoryList.Name = "directoryList";
+            this.directoryList.Size = new System.Drawing.Size(1515, 899);
+            this.directoryList.TabIndex = 2;
+            this.directoryList.UseCompatibleStateImageBehavior = false;
+            this.directoryList.View = System.Windows.Forms.View.Details;
+            this.directoryList.DoubleClick += new System.EventHandler(this.directoryList_DoubleClick);
+            // 
+            // video
+            // 
+            this.video.Text = "Video";
+            this.video.Width = 309;
+            // 
+            // visualized
+            // 
+            this.visualized.Text = "Visualized";
+            this.visualized.Width = 124;
+            // 
+            // dateOfVisualization
+            // 
+            this.dateOfVisualization.Text = "Date of Visualization";
+            this.dateOfVisualization.Width = 248;
+            // 
+            // genre
+            // 
+            this.genre.Text = "Genre";
+            this.genre.Width = 207;
+            // 
+            // personalRating
+            // 
+            this.personalRating.Text = "Personal Rating";
+            this.personalRating.Width = 218;
+            // 
+            // IMDbRating
+            // 
+            this.IMDbRating.Text = "IMDb Rating";
+            this.IMDbRating.Width = 209;
+            // 
+            // contextMenuStrip
+            // 
+            this.contextMenuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.editToolStripMenuItem});
+            this.contextMenuStrip.Name = "contextMenuStrip";
+            this.contextMenuStrip.Size = new System.Drawing.Size(128, 34);
+            // 
+            // editToolStripMenuItem
+            // 
+            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
+            this.editToolStripMenuItem.Size = new System.Drawing.Size(127, 30);
+            this.editToolStripMenuItem.Text = "Edit";
+            this.editToolStripMenuItem.Click += new System.EventHandler(this.editToolStripMenuItem_Click);
+            // 
+            // printPreviewDialog
+            // 
+            this.printPreviewDialog.AutoScrollMargin = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog.AutoScrollMinSize = new System.Drawing.Size(0, 0);
+            this.printPreviewDialog.ClientSize = new System.Drawing.Size(400, 300);
+            this.printPreviewDialog.Enabled = true;
+            this.printPreviewDialog.Icon = ((System.Drawing.Icon)(resources.GetObject("printPreviewDialog.Icon")));
+            this.printPreviewDialog.Name = "printPreviewDialog";
+            this.printPreviewDialog.Visible = false;
+            // 
+            // printDocument
+            // 
+            this.printDocument.PrintPage += new System.Drawing.Printing.PrintPageEventHandler(this.printDocument_PrintPage);
+            // 
+            // SearchResultsWindow
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1515, 899);
+            this.Controls.Add(this.directoryList);
+            this.Name = "SearchResultsWindow";
+            this.Text = "VideoManager 1.0";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SearchResultsWindow_FormClosing);
+            this.contextMenuStrip.ResumeLayout(false);
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.ColumnHeader video;
+        private System.Windows.Forms.ColumnHeader visualized;
+        private System.Windows.Forms.ColumnHeader dateOfVisualization;
+        private System.Windows.Forms.ColumnHeader genre;
+        private System.Windows.Forms.ColumnHeader personalRating;
+        private System.Windows.Forms.ColumnHeader IMDbRating;
+        private System.Windows.Forms.ListView directoryList;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem editToolStripMenuItem;
+        private System.Windows.Forms.PrintPreviewDialog printPreviewDialog;
+        private System.Drawing.Printing.PrintDocument printDocument;
+    }
+}
+
+namespace Proiect_PAW
+{
+    partial class SearchStringWindow
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.stringTextBox = new System.Windows.Forms.TextBox();
+            this.okButton = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // stringTextBox
+            // 
+            this.stringTextBox.Location = new System.Drawing.Point(12, 12);
+            this.stringTextBox.Name = "stringTextBox";
+            this.stringTextBox.Size = new System.Drawing.Size(254, 26);
+            this.stringTextBox.TabIndex = 0;
+            // 
+            // okButton
+            // 
+            this.okButton.Location = new System.Drawing.Point(54, 57);
+            this.okButton.Name = "okButton";
+            this.okButton.Size = new System.Drawing.Size(158, 42);
+            this.okButton.TabIndex = 1;
+            this.okButton.Text = "OK";
+            this.okButton.UseVisualStyleBackColor = true;
+            this.okButton.Click += new System.EventHandler(this.okButton_Click);
+            // 
+            // SearchStringWindow
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(278, 115);
+            this.Controls.Add(this.okButton);
+            this.Controls.Add(this.stringTextBox);
+            this.Name = "SearchStringWindow";
+            this.Text = "SearchStringWindow";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.TextBox stringTextBox;
+        private System.Windows.Forms.Button okButton;
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Proiect_PAW
+{
+    public partial class SearchStringWindow : Form
+    {
+        private string str = "";
+
+        public string Str
+        {
+            get { return str; }
+            set { str = value; }
+        }
+
+        public SearchStringWindow()
+        {
+            InitializeComponent();
+        }
+
+        private void okButton_Click(object sender, EventArgs e)
+        {
+            this.str = stringTextBox.Text;
+            this.Close();
+        }
+    }
+}
+
+namespace Proiect_PAW
+{
+    partial class SearchWindow
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.label1 = new System.Windows.Forms.Label();
+            this.closeButton = new System.Windows.Forms.Button();
+            this.searchDomainUpDown = new System.Windows.Forms.DomainUpDown();
+            this.searchButton = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(53, 74);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(84, 20);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "Search by:";
+            // 
+            // closeButton
+            // 
+            this.closeButton.Location = new System.Drawing.Point(178, 169);
+            this.closeButton.Name = "closeButton";
+            this.closeButton.Size = new System.Drawing.Size(115, 38);
+            this.closeButton.TabIndex = 3;
+            this.closeButton.Text = "Close";
+            this.closeButton.UseVisualStyleBackColor = true;
+            this.closeButton.Click += new System.EventHandler(this.closeButton_Click);
+            // 
+            // searchDomainUpDown
+            // 
+            this.searchDomainUpDown.Items.Add("Name");
+            this.searchDomainUpDown.Items.Add("Genre");
+            this.searchDomainUpDown.Items.Add("Personal rating");
+            this.searchDomainUpDown.Items.Add("IMDb rating");
+            this.searchDomainUpDown.Items.Add("Visualized");
+            this.searchDomainUpDown.Items.Add("Not visualized");
+            this.searchDomainUpDown.Location = new System.Drawing.Point(143, 74);
+            this.searchDomainUpDown.Name = "searchDomainUpDown";
+            this.searchDomainUpDown.Size = new System.Drawing.Size(146, 26);
+            this.searchDomainUpDown.TabIndex = 4;
+            this.searchDomainUpDown.Text = "Select";
+            // 
+            // searchButton
+            // 
+            this.searchButton.Location = new System.Drawing.Point(57, 169);
+            this.searchButton.Name = "searchButton";
+            this.searchButton.Size = new System.Drawing.Size(115, 38);
+            this.searchButton.TabIndex = 5;
+            this.searchButton.Text = "Search";
+            this.searchButton.UseVisualStyleBackColor = true;
+            this.searchButton.Click += new System.EventHandler(this.searchButton_Click);
+            // 
+            // SearchWindow
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(362, 253);
+            this.Controls.Add(this.searchButton);
+            this.Controls.Add(this.searchDomainUpDown);
+            this.Controls.Add(this.closeButton);
+            this.Controls.Add(this.label1);
+            this.Name = "SearchWindow";
+            this.Text = "SearchWindow";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button closeButton;
+        private System.Windows.Forms.DomainUpDown searchDomainUpDown;
+        private System.Windows.Forms.Button searchButton;
+    }
+}
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Proiect_PAW
+{
+    public partial class SearchWindow : Form
+    {
+        ArrayList files;
+        ArrayList newFiles = new ArrayList();
+
+        public SearchWindow(ArrayList files)
+        {
+            InitializeComponent();
+            this.files = files;
+        }
+
+        private void closeButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void searchButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string searchMethod = searchDomainUpDown.SelectedItem.ToString();
+                newFiles.Clear();
+
+                if (searchMethod.CompareTo("Name") == 0)
+                {
+                    SearchStringWindow searchStringWindow = new SearchStringWindow();
+                    searchStringWindow.ShowDialog();
+                    string searchPattern = searchStringWindow.Str;
+                    
+                    foreach (VideoFile file in files)
+                    {
+                        if (String.Compare(file.FileInfo.FullName.Split('\\')[file.FileInfo.FullName.Split('\\').Length - 1], searchPattern, true) == 0)
+                            newFiles.Add(file);
+                    }
+                }
+                else if (searchMethod.CompareTo("Genre") == 0)
+                {
+                    SearchStringWindow searchStringWindow = new SearchStringWindow();
+                    searchStringWindow.ShowDialog();
+                    string searchPattern = searchStringWindow.Str;
+
+                    foreach (VideoFile file in files)
+                    {
+                        if (String.Compare(file.Genre, searchPattern, true) == 0)
+                            newFiles.Add(file);
+                    }
+                }
+                else if (searchMethod.CompareTo("Personal rating") == 0)
+                {
+                    SearchRatingWindow searchRatingWindow = new SearchRatingWindow();
+                    searchRatingWindow.ShowDialog();
+                    double rating = searchRatingWindow.Rating;
+
+                    foreach (VideoFile file in files)
+                    {
+                        if (file.PersonalRating >= rating)
+                            newFiles.Add(file);
+                    }
+                }
+                else if (searchMethod.CompareTo("IMDb rating") == 0)
+                {
+                    SearchRatingWindow searchRatingWindow = new SearchRatingWindow();
+                    searchRatingWindow.ShowDialog();
+                    double rating = searchRatingWindow.Rating;
+
+                    foreach (VideoFile file in files)
+                    {
+                        if (file.IMDbRating >= rating)
+                            newFiles.Add(file);
+                    }
+                }
+                else if (searchMethod.CompareTo("Visualized") == 0)
+                {
+                    foreach (VideoFile file in files)
+                    {
+                        if (file.IsVisualized == true)
+                            newFiles.Add(file);
+                    }
+                }
+                else if (searchMethod.CompareTo("Not visualized") == 0)
+                {
+                    foreach (VideoFile file in files)
+                    {
+                        if (file.IsVisualized == false)
+                            newFiles.Add(file);
+                    }
+                }
+
+                if (newFiles.Count > 0)
+                    new SearchResultsWindow(newFiles).ShowDialog();
+                else
+                {
+                    MessageBox.Show("No results found!", "Message", MessageBoxButtons.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Select a searching method!", "Error", MessageBoxButtons.OK);
+            }
+        }
+    }
+}
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Proiect_PAW
+{
+    public class VideoDelegateEventArgs : EventArgs
+    {
+        public string path;
+        public string fileName;
+
+        public VideoDelegateEventArgs(string path, string fileName)
+        {
+            this.path = path;
+            this.fileName = fileName;
+        }
+    }
+
+    public class VideoDelegate
+    {
+        public delegate void VideoDelegateActionDelegate(object sender, VideoDelegateEventArgs e);
+
+        public event VideoDelegateActionDelegate VideoDelegateEvent = null;
+
+        public void Play(VideoDelegateEventArgs e)
+        {
+            if (VideoDelegateEvent != null)
+            {
+                VideoDelegateEvent(this, e);
+            }
+        }
+    }
+
+    public class VideoDelegateHandler
+    {
+        public void printVideoInfo(object sender, VideoDelegateEventArgs e)
+        {
+            if (e.fileName.Length > 0)
+            {
+                Console.WriteLine("File path is: " +
+                    e.path.Split('\\')[e.path.Split('\\').Length - 1] + "\nFile name is: " + e.fileName + "\n");
+            }
+        }
+
+        public VideoDelegateHandler(VideoDelegate videoDelegate)
+        {
+            videoDelegate.VideoDelegateEvent += new VideoDelegate.VideoDelegateActionDelegate(this.printVideoInfo);
+        }
+    }
+}
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Proiect_PAW
+{
+    class VideoDirectory :Directories, INumberOfFiles
+    {
+        private ArrayList videoFiles;
+
+        public ArrayList VideoFiles
+        {
+            get { return videoFiles; }
+            set { videoFiles = value; }
+        }
+
+        public VideoDirectory(string location, ArrayList videoFiles)
+            : base(location)
+        {
+            this.videoFiles = videoFiles;
+        }
+
+        public int numberOfFiles(ArrayList videoFiles)
+        {
+            return videoFiles.Count;
+        }
+    }
+}
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Proiect_PAW
+{
+    public class VideoFile :ICloneable, IComparable
+    {
+        private FileInfo fileInfo;
+
+        public FileInfo FileInfo
+        {
+            get { return fileInfo; }
+            set { fileInfo = value; }
+        }
+
+        private bool isVisualized = false;
+
+        public bool IsVisualized
+        {
+            get { return isVisualized; }
+            set { isVisualized = value; }
+        }
+
+        private string dateOfVisualization;
+
+        public string DateOfVisualization
+        {
+            get { return dateOfVisualization; }
+            set { dateOfVisualization = value; }
+        }
+
+        private string genre;
+
+        public string Genre
+        {
+            get { return genre; }
+            set { genre = value; }
+        }
+
+        private double personalRating;
+
+        public double PersonalRating
+        {
+            get { return personalRating; }
+            set { personalRating = value; }
+        }
+
+        private double imdbRating;
+
+        public double IMDbRating
+        {
+            get { return imdbRating; }
+            set { imdbRating = value; }
+        }
+
+        public VideoFile(FileInfo fileInfo, bool isVisualized, string dateOfVisualization, string genre, double personalRating, double imdbRating)
+        {
+            this.FileInfo = fileInfo;
+            this.isVisualized = isVisualized;
+            this.dateOfVisualization = dateOfVisualization;
+            this.genre = genre;
+            this.personalRating = personalRating;
+            this.imdbRating = imdbRating;
+        }
+
+        public VideoFile(FileInfo fileInfo)
+        {
+            this.FileInfo = fileInfo;
+            this.isVisualized = false;
+            this.dateOfVisualization = "Hasn't been visualized yet.";
+            this.genre = "Unknown";
+            this.personalRating = 5.0;
+            this.imdbRating = 5.0;
+        }
+
+        object ICloneable.Clone()
+        {
+            return this.MemberwiseClone();
+        }
+
+        public VideoFile Clone()
+        {
+            return (VideoFile)((ICloneable)this).Clone();
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (this.personalRating > ((VideoFile)obj).personalRating)
+                return 1;
+            else if (this.personalRating < ((VideoFile)obj).personalRating)
+                return -1;
+            else return String.Compare(this.fileInfo.FullName, ((VideoFile)obj).fileInfo.FullName);
+        }
+
+        public static VideoFile operator +(VideoFile videoFile, double m)
+        {
+            VideoFile newVideoFile = videoFile.Clone();
+            newVideoFile.personalRating += m;
+            return newVideoFile;
+        }
+
+        public static VideoFile operator ++(VideoFile videoFile)
+        {
+            videoFile += 1;
+            return videoFile;
+        }
+
+        public static explicit operator double(VideoFile videoFile)
+        {
+            return videoFile.personalRating;
+        }
+
+        public override string ToString()
+        {
+            string output = fileInfo.FullName + " was " + (IsVisualized ? "visualized" : "not visualized yet");
+            if (IsVisualized)
+                output += "\nDate: " + dateOfVisualization;
+            if (String.Compare(genre, "Unknown", true) != 0)
+                output += "\nGenre is " + genre;
+            if (IsVisualized)
+                output += "\nMy rating is " + personalRating;
+            output += "\nIMDb rating is " + imdbRating;
+            output += "\n\n";
+            return output;
+        }
+    }
+}

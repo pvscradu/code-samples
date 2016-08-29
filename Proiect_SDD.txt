@@ -1,0 +1,1379 @@
+#include <iostream>
+#include <windows.system.h>
+#include <ctime>
+#include <conio.h>
+#include <cstring>
+
+using namespace std;
+
+struct Node {
+	char* name;
+	Node* pNext;
+};
+
+struct TreeNode {
+	char* name;
+	TreeNode* left;
+	TreeNode* right;
+};
+
+struct HashTable {
+	Node** root;
+	int dim;
+};
+
+FILE* pLog;
+time_t timer;
+char err[200];
+char command[200], **argv, path[200];
+int argc = 0;
+bool cont = true;
+HashTable hashTable;
+TreeNode* treeRoot = NULL;
+Node* saveGetList;
+
+void filterBySize(long size) {
+	char buffer[200], *pch, line[200];
+	FILE* in = fopen("directories.txt", "r");
+	FILE* out = fopen("out.txt", "w");
+
+	fscanf(in, "%[^\n]s", buffer);
+
+	while (!feof(in)) {
+		strcpy(line, buffer);
+		pch = strtok(buffer, " ");
+		pch = strtok(NULL, " ");
+		pch = strtok(NULL, " ");
+		pch = strtok(NULL, " ");
+		if (atol(pch) > size)
+			fprintf(out, "%s\n", line);
+		fscanf(in, "\n");
+		fscanf(in, "%[^\n]s", buffer);
+	}
+
+	fclose(in);
+	fclose(out);
+	remove("directories.txt");
+	rename("out.txt", "directories.txt");
+}
+
+long getSize(char* name) {
+	char buffer[200], *pch;
+	strcpy(buffer, name);
+	pch = strtok(buffer, " ");
+	pch = strtok(NULL, " ");
+	pch = strtok(NULL, " ");
+	pch = strtok(NULL, " ");
+	pch = strtok(NULL, " ");
+	return atol(pch);
+}
+
+void initializeHashTable(HashTable& hashTable, int dim) {
+	hashTable.root = (Node**)malloc(sizeof(Node*)* dim);
+	hashTable.dim = dim;
+	memset(hashTable.root, 0, sizeof(Node*)* dim);
+}
+
+Node* createNode(char* name) {
+	Node* node = (Node*)malloc(sizeof(Node));
+	node->name = (char*)malloc(strlen(name) + 1);
+	strcpy(node->name, name);
+	node->pNext = NULL;
+	return node;
+}
+
+void insertList(Node* &root, Node* newNode) {
+	newNode->pNext = root;
+	root = newNode;
+}
+
+int isDirectory(char* name) {
+	char buffer[200], *pch;
+	strcpy(buffer, name);
+	pch = strstr(buffer, "<DIR>");
+	if (pch)
+		return 1;
+	else
+		return 0;
+}
+
+int hashFunction(char* path, int dim) {
+	int sum = 0;
+	for (int i = 0; i < strlen(path); i++)
+		sum += (int)(path[i]) * (i + 1);
+	return sum % dim;
+}
+
+void insertHashTable(HashTable &hashTable, Node* newNode) {
+	int index = hashFunction(path, hashTable.dim);
+	Node* list = hashTable.root[index];
+	insertList(list, newNode);
+	hashTable.root[index] = list;
+}
+
+Node* getHashTable(int index, HashTable hashTable) {
+	return hashTable.root[index];
+}
+
+void printHashTable(HashTable hashTable) {
+	printf("\nHashTable elements:\n");
+	for (int i = 0; i < hashTable.dim; i++) {
+		Node* list = getHashTable(i, hashTable);
+		while (list) {
+			printf("%s\n", list->name);
+			list = list->pNext;
+		}
+	}
+}
+
+TreeNode* createTreeNode(char* name)
+{
+	TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
+	node->name = (char*)malloc(strlen(name) + 1);
+	strcpy(node->name, name);
+	node->left = node->right = NULL;
+	return node;
+}
+
+void LRR(TreeNode* root) {
+	if (root) {
+		LRR(root->left);
+		printf("%s\n", root->name);
+		LRR(root->right);
+	}
+}
+
+void printTree(TreeNode* root) {
+	printf("\nTree nodes:\n");
+	LRR(root);
+}
+
+void insertTree(TreeNode*& root, TreeNode* node) {
+	if (root == NULL) {
+		root = node;
+	}
+	else {
+		if (isDirectory(node->name))
+			insertTree(root->left, node);
+		else
+			insertTree(root->right, node);
+	}
+}
+
+void deleteTree(TreeNode*& root) {
+	if (root) {
+		if (isDirectory(root->name))
+			deleteTree(root->left);
+		else
+			deleteTree(root->right);
+
+		TreeNode* tmp = root;
+		free(tmp->name);
+		free(tmp);
+		root = NULL;
+	}
+}
+
+void deleteHashTable(HashTable& hashTable) {
+	for (int i = 0; i < hashTable.dim; i++) {
+		Node* list = getHashTable(i, hashTable);
+		while (list) {
+			Node* tmp = list->pNext;
+			free(list->name);
+			free(list);
+			list = tmp;
+		}
+	}
+}
+
+int fileNumberOfLines() {
+	int size = 0;
+	char buffer[200] = "";
+	FILE* pFile = fopen("directories.txt", "r");
+
+	fscanf(pFile, "%[^\n]s", buffer);
+	fscanf(pFile, "\n");
+	if (strcmp(buffer, "") != 0)
+		size++;
+
+	while (!feof(pFile)) {
+		fscanf(pFile, "%[^\n]s", buffer);
+		fscanf(pFile, "\n");
+		size++;
+	}
+
+	fclose(pFile);
+	return size;
+}
+
+void truncFile() {
+	int lines = fileNumberOfLines();
+	char buffer[200] = "";
+	FILE* in = fopen("directories.txt", "r");
+	FILE* out = fopen("out.txt", "w");
+
+	fscanf(in, "%[^\n]s", buffer);
+
+	for (int i = 0; i < lines - 2; i++) {
+		fprintf(out, "%s\n", buffer);
+		fscanf(in, "\n");
+		fscanf(in, "%[^\n]s", buffer);
+	}
+
+	fclose(in);
+	fclose(out);
+	remove("directories.txt");
+	rename("out.txt", "directories.txt");
+}
+
+long fileLength() {
+	long size;
+	FILE* pFile = fopen("directories.txt", "r");
+	fseek(pFile, 0, SEEK_END);
+	size = ftell(pFile);
+	fclose(pFile);
+	return size;
+}
+
+void consolePrint(int lines) {
+	char buffer[200] = "";
+
+	FILE* pFile = fopen("directories.txt", "r");
+
+	fscanf(pFile, "%[^\n]s", buffer);
+
+	for (int i = 0; i < lines; i++) {
+		printf("%s\n", buffer);
+
+		fscanf(pFile, "\n");
+		fscanf(pFile, "%[^\n]s", buffer);
+	}
+
+	fclose(pFile);
+}
+
+void logPrint(char* command, char* err) {
+	pLog = fopen("log.txt", "a");
+	time(&timer);
+	fprintf(pLog, "Command: %s\nErrors: %s\nTime: %s\n", command, err, ctime(&timer));
+	fclose(pLog);
+}
+
+void populateHashTable(int lines) {
+	char buffer[200];
+
+	FILE* pFile = fopen("directories.txt", "r");
+
+	fscanf(pFile, "%[^\n]s", buffer);
+
+	for (int i = 0; i < lines; i++) {
+		Node* node = createNode(buffer);
+		insertHashTable(hashTable, node);
+
+		fscanf(pFile, "\n");
+		fscanf(pFile, "%[^\n]s", buffer);
+	}
+
+	fclose(pFile);
+}
+
+void populateTree(int lines) {
+	char buffer[200];
+
+	FILE* pFile = fopen("directories.txt", "r");
+
+	fscanf(pFile, "%[^\n]s", buffer);
+
+	for (int i = 0; i < lines; i++) {
+		TreeNode* node = createTreeNode(buffer);
+		insertTree(treeRoot, node);
+
+		fscanf(pFile, "\n");
+		fscanf(pFile, "%[^\n]s", buffer);
+	}
+
+	fclose(pFile);
+}
+
+void list(int argc, ...) {
+	char command[200];
+	strcpy(err, "");
+	va_list stackPtr;
+
+	_crt_va_start(stackPtr, argc);
+	if (argc == 1) {
+		char path_to[256];
+
+		strcpy(path_to, _crt_va_arg(stackPtr, char*));
+
+		strcpy(command, "(cd ");
+		strcat(command, path_to);
+		strcat(command, " && dir /-C) | more +5 >directories.txt");
+
+		system(command);
+	}
+	else {
+		strcpy(command, "dir /-C | more +5 >directories.txt");
+		system(command);
+	}
+
+	if (fileLength() == 0)
+		strcpy(err, "The system cannot find the path specified.");
+
+	truncFile();
+
+	consolePrint(fileNumberOfLines());
+	populateHashTable(fileNumberOfLines());
+
+	remove("directories.txt");
+}
+
+void getStackPtrContent(char* stackPtrContent, char path_to[], char type[], long &size) {
+	if (strcmp(stackPtrContent, "-d") == 0 || strcmp(stackPtrContent, "-f") == 0)
+		strcpy(type, stackPtrContent);
+	else {
+		bool isSize = true;
+
+		for (int i = 0; i < strlen(stackPtrContent); i++) {
+			if (!isdigit(stackPtrContent[i]))
+				isSize = false;
+		}
+
+		if (isSize) {
+			size = atol(stackPtrContent);
+		}
+		else
+			strcpy(path_to, stackPtrContent);
+	}
+}
+
+void filter(int argc, ...) {
+	char command[200];
+	strcpy(err, "");
+	va_list stackPtr;
+
+	if (treeRoot)
+		deleteTree(treeRoot);
+
+	_crt_va_start(stackPtr, argc);
+	if (argc == 0) {
+		strcpy(command, "dir | more +5 >directories.txt");
+		system(command);
+
+		truncFile();
+	}
+	else if (argc == 1) {
+		char path_to[256] = "", type[3] = "", stackPtrContent[256];
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent(stackPtrContent, path_to, type, size);
+
+		if (strcmp(path_to, "") != 0) {
+			strcpy(command, "(cd ");
+			strcat(command, path_to);
+			strcat(command, " && dir) | more +5 >directories.txt");
+		}
+		else if (strcmp(type, "-d") == 0 || strcmp(type, "-f") == 0) {
+			if (strcmp(type, "-d") == 0)
+				strcpy(command, "dir | more +5 | find \"<DIR>\" >directories.txt");
+			else
+				strcpy(command, "dir | more +5 | find /V \"<DIR>\" >directories.txt");
+		}
+		else if (size > 0) {
+			strcpy(command, "dir /-C /O:S | more +5 | find /V \"<DIR>\" >directories.txt");
+		}
+		system(command);
+
+		if (size > 0)
+			filterBySize(size);
+		else if (strcmp(type, "-f") == 0 || strcmp(path_to, "") != 0)
+			truncFile();
+	}
+	else if (argc == 2) {
+		char path_to[256] = "", type[3] = "", stackPtrContent[256];
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent(stackPtrContent, path_to, type, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent(stackPtrContent, path_to, type, size);
+
+		if (strcmp(path_to, "") != 0) {
+			strcpy(command, "(cd ");
+			strcat(command, path_to);
+			strcat(command, " && dir ");
+		}
+		else
+			strcpy(command, "(dir ");
+		if (size > 0) {
+			strcat(command, "/-C /O:S) ");
+		}
+		else
+			strcat(command, ") ");
+		if (strcmp(type, "-d") == 0 || strcmp(type, "-f") == 0) {
+			if (strcmp(type, "-d") == 0)
+				strcat(command, "| more +5 | find \"<DIR>\" >directories.txt");
+			else
+				strcat(command, "| more +5 | find /V \"<DIR>\" >directories.txt");
+		}
+		else {
+			strcat(command, "| more +5 >directories.txt");
+		}
+		system(command);
+
+		if (size > 0)
+			filterBySize(size);
+		else if (strcmp(type, "-f") == 0 || strcmp(path_to, "") != 0)
+			truncFile();
+	}
+	else if (argc == 3) {
+		char path_to[256] = "", type[3] = "", stackPtrContent[256];
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent(stackPtrContent, path_to, type, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent(stackPtrContent, path_to, type, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent(stackPtrContent, path_to, type, size);
+
+		if (strcmp(path_to, "") != 0) {
+			strcpy(command, "(cd ");
+			strcat(command, path_to);
+			strcat(command, " && dir ");
+		}
+		else
+			strcpy(command, "(dir ");
+		if (size > 0) {
+			strcat(command, "/-C /O:S) ");
+		}
+		else
+			strcat(command, ") ");
+		if (strcmp(type, "-d") == 0 || strcmp(type, "-f") == 0) {
+			if (strcmp(type, "-d") == 0)
+				strcat(command, "| more +5 | find \"<DIR>\" >directories.txt");
+			else
+				strcat(command, "| more +5 | find /V \"<DIR>\" >directories.txt");
+		}
+		else {
+			strcat(command, "| more +5 >directories.txt");
+		}
+		system(command);
+
+		if (size > 0)
+			filterBySize(size);
+		else if (strcmp(type, "-f") == 0 || strcmp(path_to, "") != 0)
+			truncFile();
+	}
+
+	if (fileLength() == 0)
+		strcpy(err, "The system cannot find the path specified.");
+
+	consolePrint(fileNumberOfLines());
+	populateTree(fileNumberOfLines());
+
+	remove("directories.txt");
+}
+
+void exit() {
+	if (treeRoot)
+		deleteTree(treeRoot);
+	if (hashTable.root) {
+		deleteHashTable(hashTable);
+	}
+	if (saveGetList) {
+		Node* list = saveGetList;
+		while (list) {
+			Node* tmp = list->pNext;
+			free(list->name);
+			free(list);
+			list = tmp;
+		}
+	}
+	cont = false;
+}
+
+void getStackPtrContent_get(char* stackPtrContent, char path_to[], char s[], char p[], char date[], char extension[], long &size) {
+	if (strcmp(stackPtrContent, "-s") == 0)
+		strcpy(s, stackPtrContent);
+	else if (strcmp(stackPtrContent, "-p") == 0)
+		strcpy(p, stackPtrContent);
+	else if (strchr(stackPtrContent, '.') != 0)
+		strcpy(extension, stackPtrContent);
+	else if (strchr(stackPtrContent, '/') != 0)
+		strcpy(date, stackPtrContent);
+	else {
+		bool isSize = true;
+
+		for (int i = 0; i < strlen(stackPtrContent); i++) {
+			if (!isdigit(stackPtrContent[i]))
+				isSize = false;
+		}
+
+		if (isSize) {
+			size = atol(stackPtrContent);
+		}
+		else
+			strcpy(path_to, stackPtrContent);
+	}
+}
+
+char* getName(char* entry) {
+	char buffer[200], *pch;
+	strcpy(buffer, entry);
+	pch = strtok(buffer, " ");
+	pch = strtok(NULL, " ");
+	pch = strtok(NULL, " ");
+	pch = strtok(NULL, " ");
+	pch = strtok(NULL, " ");
+	return pch;
+}
+
+char* getDate(char* entry) {
+	char buffer[200], *pch;
+	strcpy(buffer, entry);
+	pch = strtok(buffer, " ");
+	return pch;
+}
+
+char* getExtension(char* entry) {
+	char *pch;
+	pch = strchr(entry, '.');
+	if (pch)
+		return pch;
+	else return ".";
+}
+
+void stackSort(Node*& root) {
+	Node* tmp = root;
+	while (tmp->pNext) {
+		char c1 = (getName(tmp->name))[0], c2 = (getName(tmp->pNext->name))[0];
+		if (isupper(c1))
+			c1 = tolower(c1);
+		if (isupper(c2))
+			c2 = tolower(c2);
+		if (c2 > c2) {
+			char buffer[200];
+			strcpy(buffer, tmp->name);
+			free(tmp->name);
+			tmp->name = (char*)malloc(strlen(tmp->pNext->name) + 1);
+			strcpy(tmp->name, tmp->pNext->name);
+			free(tmp->pNext->name);
+			tmp->pNext->name = (char*)malloc(strlen(buffer) + 1);
+			strcpy(tmp->pNext->name, buffer);
+		}
+		tmp = tmp->pNext;
+	}
+}
+
+void removeNode(Node*& root, Node* node) {
+	if (root) {
+		if (node == root) {
+			Node* tmp = root;
+			root = root->pNext;
+			free(tmp->name);
+			free(tmp);
+		}
+		else {
+			Node* tmp = root;
+			while (tmp && tmp->pNext) {
+				if (tmp->pNext == node) {
+					Node* colector = tmp->pNext;
+					tmp->pNext = tmp->pNext->pNext;
+					free(colector->name);
+					free(colector);
+				}
+				tmp = tmp->pNext;
+			}
+		}
+	}
+}
+
+void get(int argc, ...) {
+	va_list stackPtr;
+	strcpy(err, "");
+
+	_crt_va_start(stackPtr, argc);
+	if (argc == 0) {
+		Node* list = NULL;
+		for (int i = 0; i < hashTable.dim; i++) {
+			Node* tmp = getHashTable(i, hashTable);
+			while (tmp) {
+				if (!isDirectory(tmp->name)) {
+					printf("%s\n", tmp->name);
+					insertList(list, createNode(tmp->name));
+				}
+				tmp = tmp->pNext;
+			}
+		}
+		saveGetList = list;
+	}
+	else if (argc == 1) {
+		char path_to[256] = "", s[3] = "", p[3] = "", stackPtrContent[256], date[20] = "", extension[10] = "";
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+
+		if (strcmp(path_to, "") != 0) {
+			printf("Invalid command.\nCommand synthax is: get [-s] [-p <Path_To>] [<Size>] [<Date>] [<Extension>]\n");
+			strcpy(err, "Invalid command. Incorrect synthax.");
+		}
+		else {
+			Node* list = NULL;
+			for (int i = 0; i < hashTable.dim; i++) {
+				Node* tmp = getHashTable(i, hashTable);
+				while (tmp) {
+					insertList(list, createNode(tmp->name));
+					tmp = tmp->pNext;
+				}
+			}
+
+			if (strcmp(s, "") != 0) {
+				stackSort(list);
+			}
+			else if (size > 0) {
+				Node* tmp = list;
+				char entry[200], *pch;
+
+				while (tmp) {
+					strcpy(entry, tmp->name);
+					pch = strtok(entry, " ");
+					pch = strtok(NULL, " ");
+					pch = strtok(NULL, " ");
+					pch = strtok(NULL, " ");
+					if (atol(pch) < size) {
+						removeNode(list, tmp);
+						tmp = list;
+					}
+					else {
+						if (tmp && tmp->pNext)
+							tmp = tmp->pNext;
+						else break;
+					}
+				}
+			}
+			else if (strcmp(date, "") != 0) {
+				Node* tmp = list;
+				char entry[200], *pch;
+
+				while (tmp) {
+					if (strcmp(getDate(tmp->name), date) < 0) {
+						removeNode(list, tmp);
+						tmp = list;
+					}
+					if (tmp && tmp->pNext)
+						tmp = tmp->pNext;
+					else break;
+				}
+			}
+			else if (strcmp(extension, "") != 0) {
+				Node* tmp = list;
+				char entry[200], *pch;
+
+				while (tmp) {
+					if (strcmp(getExtension(tmp->name), extension) != 0) {
+						removeNode(list, tmp);
+						tmp = list;
+					}
+					if (tmp && tmp->pNext)
+						tmp = tmp->pNext;
+					else break;
+				}
+			}
+
+			Node* tmp = list;
+			while (tmp) {
+				printf("%s\n", tmp->name);
+				tmp = tmp->pNext;
+			}
+			saveGetList = list;
+		}
+	}
+	else if (argc == 2) {
+		char path_to[256] = "", s[3] = "", p[3] = "", stackPtrContent[256], date[20] = "", extension[10] = "";
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+
+		Node* list = NULL;
+		if (strcmp(p, "") != 0) {
+			int index = hashFunction(path_to, 997);
+			Node* tmp = getHashTable(index, hashTable);
+			while (tmp) {
+				insertList(list, createNode(tmp->name));
+				tmp = tmp->pNext;
+			}
+		}
+		else {
+			for (int i = 0; i < hashTable.dim; i++) {
+				Node* tmp = getHashTable(i, hashTable);
+				while (tmp) {
+					insertList(list, createNode(tmp->name));
+					tmp = tmp->pNext;
+				}
+			}
+		}
+
+		if (strcmp(s, "") != 0) {
+			stackSort(list);
+		}
+		if (size > 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				strcpy(entry, tmp->name);
+				pch = strtok(entry, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				if (atol(pch) < size) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				else {
+					if (tmp && tmp->pNext)
+						tmp = tmp->pNext;
+					else break;
+				}
+			}
+		}
+		if (strcmp(date, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getDate(tmp->name), date) < 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+		if (strcmp(extension, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getExtension(tmp->name), extension) != 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+
+		Node* tmp = list;
+		while (tmp) {
+			printf("%s\n", tmp->name);
+			tmp = tmp->pNext;
+		}
+		saveGetList = list;
+	}
+	else if (argc == 3) {
+		char path_to[256] = "", s[3] = "", p[3] = "", stackPtrContent[256], date[20] = "", extension[10] = "";
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+
+		Node* list = NULL;
+		if (strcmp(p, "") != 0) {
+			int index = hashFunction(path_to, 997);
+			Node* tmp = getHashTable(index, hashTable);
+			while (tmp) {
+				insertList(list, createNode(tmp->name));
+				tmp = tmp->pNext;
+			}
+		}
+		else {
+			for (int i = 0; i < hashTable.dim; i++) {
+				Node* tmp = getHashTable(i, hashTable);
+				while (tmp) {
+					insertList(list, createNode(tmp->name));
+					tmp = tmp->pNext;
+				}
+			}
+		}
+
+		if (strcmp(s, "") != 0) {
+			stackSort(list);
+		}
+		if (size > 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				strcpy(entry, tmp->name);
+				pch = strtok(entry, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				if (atol(pch) < size) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				else {
+					if (tmp && tmp->pNext)
+						tmp = tmp->pNext;
+					else break;
+				}
+			}
+		}
+		if (strcmp(date, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getDate(tmp->name), date) < 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+		if (strcmp(extension, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getExtension(tmp->name), extension) != 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+
+		Node* tmp = list;
+		while (tmp) {
+			printf("%s\n", tmp->name);
+			tmp = tmp->pNext;
+		}
+		saveGetList = list;
+	}
+	else if (argc == 4) {
+		char path_to[256] = "", s[3] = "", p[3] = "", stackPtrContent[256], date[20] = "", extension[10] = "";
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+
+		Node* list = NULL;
+		if (strcmp(p, "") != 0) {
+			int index = hashFunction(path_to, 997);
+			Node* tmp = getHashTable(index, hashTable);
+			while (tmp) {
+				insertList(list, createNode(tmp->name));
+				tmp = tmp->pNext;
+			}
+		}
+		else {
+			for (int i = 0; i < hashTable.dim; i++) {
+				Node* tmp = getHashTable(i, hashTable);
+				while (tmp) {
+					insertList(list, createNode(tmp->name));
+					tmp = tmp->pNext;
+				}
+			}
+		}
+
+		if (strcmp(s, "") != 0) {
+			stackSort(list);
+		}
+		if (size > 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				strcpy(entry, tmp->name);
+				pch = strtok(entry, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				if (atol(pch) < size) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				else {
+					if (tmp && tmp->pNext)
+						tmp = tmp->pNext;
+					else break;
+				}
+			}
+		}
+		if (strcmp(date, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getDate(tmp->name), date) < 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+		if (strcmp(extension, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getExtension(tmp->name), extension) != 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+
+		Node* tmp = list;
+		while (tmp) {
+			printf("%s\n", tmp->name);
+			tmp = tmp->pNext;
+		}
+		saveGetList = list;
+	}
+	else if (argc == 5) {
+		char path_to[256] = "", s[3] = "", p[3] = "", stackPtrContent[256], date[20] = "", extension[10] = "";
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+
+		Node* list = NULL;
+		if (strcmp(p, "") != 0) {
+			int index = hashFunction(path_to, 997);
+			Node* tmp = getHashTable(index, hashTable);
+			while (tmp) {
+				insertList(list, createNode(tmp->name));
+				tmp = tmp->pNext;
+			}
+		}
+		else {
+			for (int i = 0; i < hashTable.dim; i++) {
+				Node* tmp = getHashTable(i, hashTable);
+				while (tmp) {
+					insertList(list, createNode(tmp->name));
+					tmp = tmp->pNext;
+				}
+			}
+		}
+
+		if (strcmp(s, "") != 0) {
+			stackSort(list);
+		}
+		if (size > 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				strcpy(entry, tmp->name);
+				pch = strtok(entry, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				if (atol(pch) < size) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				else {
+					if (tmp && tmp->pNext)
+						tmp = tmp->pNext;
+					else break;
+				}
+			}
+		}
+		if (strcmp(date, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getDate(tmp->name), date) < 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+		if (strcmp(extension, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getExtension(tmp->name), extension) != 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+
+		Node* tmp = list;
+		while (tmp) {
+			printf("%s\n", tmp->name);
+			tmp = tmp->pNext;
+		}
+		saveGetList = list;
+	}
+	else if (argc == 6) {
+		char path_to[256] = "", s[3] = "", p[3] = "", stackPtrContent[256], date[20] = "", extension[10] = "";
+		long size;
+
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+		strcpy(stackPtrContent, _crt_va_arg(stackPtr, char*));
+		getStackPtrContent_get(stackPtrContent, path_to, s, p, date, extension, size);
+
+		Node* list = NULL;
+		if (strcmp(p, "") != 0) {
+			int index = hashFunction(path_to, 997);
+			Node* tmp = getHashTable(index, hashTable);
+			while (tmp) {
+				insertList(list, createNode(tmp->name));
+				tmp = tmp->pNext;
+			}
+		}
+		else {
+			for (int i = 0; i < hashTable.dim; i++) {
+				Node* tmp = getHashTable(i, hashTable);
+				while (tmp) {
+					insertList(list, createNode(tmp->name));
+					tmp = tmp->pNext;
+				}
+			}
+		}
+
+		if (strcmp(s, "") != 0) {
+			stackSort(list);
+		}
+		if (size > 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				strcpy(entry, tmp->name);
+				pch = strtok(entry, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				if (atol(pch) < size) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				else {
+					if (tmp && tmp->pNext)
+						tmp = tmp->pNext;
+					else break;
+				}
+			}
+		}
+		if (strcmp(date, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getDate(tmp->name), date) < 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+		if (strcmp(extension, "") != 0) {
+			Node* tmp = list;
+			char entry[200], *pch;
+
+			while (tmp) {
+				if (strcmp(getExtension(tmp->name), extension) != 0) {
+					removeNode(list, tmp);
+					tmp = list;
+				}
+				if (tmp && tmp->pNext)
+					tmp = tmp->pNext;
+				else break;
+			}
+		}
+
+		Node* tmp = list;
+		while (tmp) {
+			printf("%s\n", tmp->name);
+			tmp = tmp->pNext;
+		}
+		saveGetList = list;
+	}
+}
+
+void saveget(int argc, ...) {
+	va_list stackPtr;
+	strcpy(err, "");
+
+	_crt_va_start(stackPtr, argc);
+	if (saveGetList) {
+		FILE* out;
+		if (argc == 0) {
+			out = fopen("C:\\Users\\raduparvulescu\\Documents\\Visual Studio 2013\\Projects\\Proiect_SDD\\Proiect_SDD\\results.txt", "w");
+			if (!out) {
+				printf("Cannot create the file at the location specified.\n");
+				strcpy(err, "Cannot create the file at the location specified.\n");
+			}
+			else {
+				Node* list = saveGetList;
+				while (list) {
+					fprintf(out, "%s\n", list->name);
+					list = list->pNext;
+				}
+				fclose(out);
+			}
+		}
+		else if (argc == 1) {
+			out = fopen(_crt_va_arg(stackPtr, char*), "w");
+			if (!out) {
+				printf("Cannot create the file at the location specified.\n");
+				strcpy(err, "Cannot create the file at the location specified.\n");
+			}
+			else {
+				Node* list = saveGetList;
+				while (list) {
+					fprintf(out, "%s\n", list->name);
+					list = list->pNext;
+				}
+				fclose(out);
+			}
+		}
+	}
+	else {
+		printf("Invalid command. No previous get command executed.\nCommand synthax is: saveget [<File_Name>]\n");
+		strcpy(err, "Invalid command. No previous get command executed.");
+	}
+}
+
+void analyseCommand(char* command, int &argc, char** &argv) {
+	char* pch, commandTokens[200];
+	int i = 0;
+
+	strcpy(commandTokens, command);
+
+	pch = strtok(commandTokens, " ");
+	while (pch != NULL) {
+		strcpy(argv[i++], pch);
+		pch = strtok(NULL, " ");
+	}
+	argc = i;
+}
+
+void switchCommand(int argc, char *argv[], char* err) {
+	if (strcmp(argv[0], "list") == 0) {
+		if (argc == 2) {
+			strcpy(path, argv[1]);
+			list(1, argv[1]);
+		}
+		else if (argc == 1) {
+			strcpy(path, "C:\\Users\\raduparvulescu\\Documents\\Visual Studio 2013\\Projects\\Proiect_SDD");
+			list(0);
+		}
+		else {
+			printf("Invalid command. Too many arguments.\nCommand synthax is: list [<Path_To>]\n");
+			strcpy(err, "Invalid command. Too many arguments.");
+		}
+		logPrint(command, err);
+		printHashTable(hashTable);
+	}
+	else if (strcmp(argv[0], "filter") == 0) {
+		if (argc == 4)
+			filter(3, argv[1], argv[2], argv[3]);
+		else if (argc == 3)
+			filter(2, argv[1], argv[2]);
+		else if (argc == 2)
+			filter(1, argv[1]);
+		else if (argc == 1)
+			filter(0);
+		else {
+			printf("Invalid command. Too many arguments.\nCommand synthax is: filter [<Path_To>] [-d | -f] [<Size>]\n");
+			strcpy(err, "Invalid command. Too many arguments.");
+		}
+		logPrint(command, err);
+		printTree(treeRoot);
+	}
+	else if (strcmp(argv[0], "get") == 0) {
+		if (argc == 6) {
+			get(5, argv[1], argv[2], argv[3], argv[4], argv[5]);
+		}
+		else if (argc == 5) {
+			get(4, argv[1], argv[2], argv[3], argv[4]);
+		}
+		else if (argc == 4) {
+			get(3, argv[1], argv[2], argv[3]);
+		}
+		else if (argc == 3) {
+			get(2, argv[1], argv[2]);
+		}
+		else if (argc == 2) {
+			get(1, argv[1]);
+		}
+		else if (argc == 1)
+			get(0);
+		else {
+			printf("Invalid command. Too many arguments.\nCommand synthax is: get [-s] [-p <Path_To>] [<Size>] [<Date>] [<Extension>]\n");
+			strcpy(err, "Invalid command. Too many arguments.");
+		}
+		logPrint(command, err);
+	}
+	else if (strcmp(argv[0], "saveget") == 0) {
+		if (argc == 2)
+			saveget(1, argv[1]);
+		else if (argc == 1)
+			saveget(0);
+		else {
+			printf("Invalid command. Too many arguments.\nCommand synthax is: saveget [<File_Name>]\n");
+			strcpy(err, "Invalid command. Too many arguments.");
+		}
+		logPrint(command, err);
+	}
+	else if (strcmp(argv[0], "exit") == 0) {
+		if (argc == 1)
+			exit();
+		else {
+			printf("Invalid command. Too many arguments.\nCommand synthax is: exit\n");
+			strcpy(err, "Invalid command. Too many arguments.");
+		}
+		logPrint(command, err);
+	}
+	else {
+		printf("Invalid command.\n");
+	}
+}
+
+void processBatchFile(char* file) {
+	FILE* pFile = fopen(file, "r");
+
+	if (pFile) {
+		char command[200];
+		fscanf(pFile, "%[^\n]s", command);
+		while (!feof(pFile)) {
+			printf("\nProcessing command: %s\n", command);
+			analyseCommand(command, argc, argv);
+			switchCommand(argc, argv, err);
+
+			fscanf(pFile, "\n");
+			fscanf(pFile, "%[^\n]s", command);
+		}
+		fclose(pFile);
+	}
+	else
+		printf("Error opening file.\n");
+}
+
+void chooseInputMethod() {
+	char inputMethod[50];
+	fflush(stdin);
+
+	printf("Choose input method (batch file/console): ");
+	gets(inputMethod);
+
+	if (strcmp(inputMethod, "batch file") == 0) {
+		char file[200];
+		fflush(stdin);
+
+		printf("Input file name: ");
+		scanf("%[^\n]s", &file);
+		processBatchFile(file);
+	}
+	else if (strcmp(inputMethod, "console") == 0) {
+		fflush(stdin);
+
+		printf("Introduce a command: ");
+		scanf("%[^\n]s", &command);
+
+		analyseCommand(command, argc, argv);
+		switchCommand(argc, argv, err);
+	}
+	else {
+		char answer;
+		printf("Invalid method. Try again? (y/n)\n");
+		fflush(stdin);
+
+		scanf("%c", &answer);
+		if (answer == 'y' || answer == 'n') {
+			if (answer == 'y')
+				chooseInputMethod();
+		}
+		else
+			printf("Invalid answer.\n");
+	}
+}
+
+void main() {
+	argv = (char**)malloc(50 * sizeof(char*));
+	for (int i = 0; i < 50; i++)
+		argv[i] = (char*)malloc(50 * sizeof(char));
+
+	strcpy(err, "");
+
+	initializeHashTable(hashTable, 997);
+
+	printf("Press enter to start execution ...");
+	fflush(stdin);
+	while (getc(stdin) == '\n' && cont) {
+		chooseInputMethod();
+		if (cont == false)
+			break;
+		printf("Do you want to enter another command? (enter)");
+		fflush(stdin);
+	}
+
+	for (int i = 0; i < 10; i++)
+		free(argv[i]);
+	free(argv);
+
+	_getch();
+}

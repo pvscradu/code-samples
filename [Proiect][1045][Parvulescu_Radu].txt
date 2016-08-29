@@ -1,0 +1,1943 @@
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+#include <conio.h>
+
+using namespace std;
+
+class Automobile{
+private:
+	char *id;
+	char *engine;
+	int max_speed;
+	int engine_cc;
+	int avg_consumption_urban;
+	int avg_speed_urban;
+	int avg_consumption;
+	int avg_speed;
+public:
+	Automobile(){
+		id = new char[strlen("Default") + 1];
+		strcpy(id, "Default");
+		engine = new char[strlen("Default") + 1];
+		strcpy(engine, "Default");
+		max_speed = 0;
+		engine_cc = 0;
+		avg_consumption_urban = 0;
+		avg_speed_urban = 0;
+		avg_consumption = 0;
+		avg_speed = 0;
+	}
+
+	Automobile(char *p1, char *p2, int p3, int p4, int p5, int p6, int p7, int p8){
+		id = new char[strlen(p1) + 1];
+		strcpy(id, p1);
+		engine = new char[strlen(p2) + 1];
+		strcpy(engine, p2);
+		max_speed = p3;
+		engine_cc = p4;
+		avg_consumption_urban = p5;
+		avg_speed_urban = p6;
+		avg_consumption = p7;
+		avg_speed = p8;
+	}
+
+	Automobile(const Automobile &a){
+		id = new char[strlen(a.id) + 1];
+		strcpy(id, a.id);
+		engine = new char[strlen(a.engine) + 1];
+		strcpy(engine, a.engine);
+		max_speed = a.max_speed;
+		engine_cc = a.engine_cc;
+		avg_consumption_urban = a.avg_consumption_urban;
+		avg_speed_urban = a.avg_speed_urban;
+		avg_consumption = a.avg_consumption;
+		avg_speed = a.avg_speed;
+	}
+
+	~Automobile(){
+		delete[] id;
+		delete[] engine;
+	}
+
+	void operator=(Automobile &a){
+		delete[] id;
+		id = new char[strlen(a.id) + 1];
+		strcpy(id, a.id);
+		delete[] engine;
+		engine = new char[strlen(a.engine) + 1];
+		strcpy(engine, a.engine);
+		max_speed = a.max_speed;
+		engine_cc = a.engine_cc;
+		avg_consumption_urban = a.avg_consumption_urban;
+		avg_speed_urban = a.avg_speed_urban;
+		avg_consumption = a.avg_consumption;
+		avg_speed = a.avg_speed;
+	}
+
+	friend ostream &operator<<(ostream &output, Automobile &a){
+		output << "id: " << a.id << endl;
+		output << "engine: " << a.engine << endl;
+		output << "max_speed: " << a.max_speed << endl;
+		output << "engine_cc: " << a.engine_cc << endl;
+		output << "avg_consumption_urban: " << a.avg_consumption_urban << endl;
+		output << "avg_speed_urban: " << a.avg_speed_urban << endl;
+		output << "avg_consumption: " << a.avg_consumption << endl;
+		output << "avg_speed: " << a.avg_speed << endl;
+		return output;
+	}
+
+	friend ifstream &operator>>(ifstream &input, Automobile &a){
+		delete[] a.id;
+		delete[] a.engine;
+
+		char buffer[50];
+		int i;
+
+		input.getline(buffer, 50);
+		a.id = new char[strlen(buffer) + 1];
+		strcpy(a.id, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("engine: "));
+		a.engine = new char[strlen(buffer) + 1];
+		strcpy(a.engine, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("max_speed: "));
+		i = atoi(buffer);
+		a.max_speed = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("engine_cc: "));
+		i = atoi(buffer);
+		a.engine_cc = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("avg_consumption_urban: "));
+		i = atoi(buffer);
+		a.avg_consumption_urban = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("avg_speed_urban: "));
+		i = atoi(buffer);
+		a.avg_speed_urban = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("avg_consumption: "));
+		i = atoi(buffer);
+		a.avg_consumption = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("avg_speed: "));
+		i = atoi(buffer);
+		a.avg_speed = i;
+
+		return input;
+	}
+
+	char *getId(){
+		return id;
+	}
+
+	char *getEngine(){
+		return engine;
+	}
+
+	int getMaxSpeed(){
+		return max_speed;
+	}
+
+	int getEngineCc(){
+		return engine_cc;
+	}
+
+	int getAvgConsumptionUrban(){
+		return avg_consumption_urban;
+	}
+
+	int getAvgSpeedUrban(){
+		return avg_speed_urban;
+	}
+
+	int getAvgConsumption(){
+		return avg_consumption;
+	}
+
+	int getAvgSpeed(){
+		return avg_speed;
+	}
+
+	void setId(char *p){
+		if (p)
+		{
+			delete[] id;
+			id = new char[strlen(p) + 1];
+			strcpy(id, p);
+		}
+	}
+
+	void setEngine(char *p){
+		if (p)
+		{
+			delete[] engine;
+			engine = new char[strlen(p) + 1];
+			strcpy(engine, p);
+		}
+	}
+
+	void setMaxSpeed(int p){
+		if (p >= 0)
+			max_speed = p;
+	}
+
+	void setEngineCc(int p){
+		if (p >= 0)
+			engine_cc = p;
+	}
+
+	void setAvgConsumptionUrban(int p){
+		if (p >= 0)
+			avg_consumption_urban = p;
+	}
+
+	void setAvgSpeedUrban(int p){
+		if (p >= 0)
+			avg_speed_urban = p;
+	}
+
+	void setAvgConsumption(int p){
+		if (p >= 0)
+			avg_consumption = p;
+	}
+
+	void setAvgSpeed(int p){
+		if (p >= 0)
+			avg_speed = p;
+	}
+
+	double greenIndex(){
+		return (double)avg_speed / avg_consumption;
+	}
+
+	double greenIndexUrban(){
+		return (double)avg_speed_urban / avg_consumption_urban;
+	}
+
+	void printAutomobile(){
+		cout << "id: " << id << endl;
+		cout << "engine: " << engine << endl;
+		cout << "max_speed: " << max_speed << endl;
+		cout << "engine_cc: " << engine_cc << endl;
+		cout << "avg_consumption_urban: " << avg_consumption_urban << endl;
+		cout << "avg_speed_urban: " << avg_speed_urban << endl;
+		cout << "avg_consumption: " << avg_consumption << endl;
+		cout << "avg_speed: " << avg_speed << endl;
+	}
+};
+
+class Location{
+	friend class Circle;
+	friend class Rectangle;
+private:
+	char *id;
+	time_t time;
+	double long latitude, longitude;
+	int velocity;
+public:
+	Location(){
+		id = new char[strlen("Default") + 1];
+		strcpy(id, "Default");
+		time = 0;
+		latitude = longitude = 0;
+		velocity = 0;
+	}
+
+	Location(char *p1, time_t p2, double long p3, double long p4, int p5){
+		id = new char[strlen(p1) + 1];
+		strcpy(id, p1);
+		time = p2;
+		latitude = p3;
+		longitude = p4;
+		velocity = p5;
+	}
+
+	Location(const Location &l){
+		id = new char[strlen(l.id) + 1];
+		strcpy(id, l.id);
+		time = l.time;
+		latitude = l.latitude;
+		longitude = l.longitude;
+		velocity = l.velocity;
+	}
+
+	~Location(){
+		delete[] id;
+	}
+
+	void operator=(Location &l){
+		delete[] id;
+		id = new char[strlen(l.id) + 1];
+		strcpy(id, l.id);
+		time = l.time;
+		latitude = l.latitude;
+		longitude = l.longitude;
+		velocity = l.velocity;
+	}
+
+	friend ostream &operator<<(ostream &output, Location &l){
+		output << "id: " << l.id << endl;
+		output << "time (formatted to UTC): " << ctime(&l.time);
+		output << "latitude: " << l.latitude << endl;
+		output << "longitude: " << l.longitude << endl;
+		output << "velocity: " << l.velocity << endl;
+		return output;
+	}
+
+	friend ifstream &operator>>(ifstream &input, Location &l){
+		delete[] l.id;
+
+		char buffer[50];
+
+		input.getline(buffer, 50);
+		l.id = new char[strlen(buffer) + 1];
+		strcpy(l.id, buffer);
+
+		input >> l.time >> l.latitude >> l.longitude >> l.velocity;
+		input.get();
+
+		l.time /= CLOCKS_PER_SEC;
+
+		return input;
+	}
+
+	char *getId(){
+		return id;
+	}
+
+	time_t getTime(){
+		return time;
+	}
+
+	double long getLatitude(){
+		return latitude;
+	}
+
+	double long getLongitude(){
+		return longitude;
+	}
+
+	int getVelocity(){
+		return velocity;
+	}
+
+	void setId(char *p){
+		if (p){
+			delete[] id;
+			id = new char[strlen(p) + 1];
+			strcpy(id, p);
+		}
+	}
+
+	void setTime(time_t p){
+		if (p >= 0)
+			time = p;
+	}
+
+	void setLatitude(double long p){
+		latitude = p;
+	}
+
+	void setLongitude(double long p){
+		longitude = p;
+	}
+
+	void setVelocity(int p){
+		if (p >= 0)
+			velocity = p;
+	}
+
+	char *convertTimeToDate(){
+		return ctime(&time);
+	}
+
+	void printLocation(){
+		cout << "The automobile with ID: " << id << " is currently at this location: " << latitude << "x" << longitude << ", having the velocity of " << velocity << " km/h" << endl;
+		cout << "Log time: " << ctime(&time);
+	}
+};
+
+class Zone{
+protected:
+	char *type;
+	char *restrictions;
+public:
+	Zone(){
+		type = new char[strlen("Default") + 1];
+		strcpy(type, "Default");
+		restrictions = new char[strlen("Default") + 1];
+		strcpy(restrictions, "Default");
+	}
+
+	Zone(char *p1, char *p2){
+		type = new char[strlen(p1) + 1];
+		strcpy(type, p1);
+		restrictions = new char[strlen(p2) + 1];
+		strcpy(restrictions, p2);
+	}
+
+	Zone(const Zone &z){
+		type = new char[strlen(z.type) + 1];
+		strcpy(type, z.type);
+		restrictions = new char[strlen(z.restrictions) + 1];
+		strcpy(restrictions, z.restrictions);
+	}
+
+	~Zone(){
+		delete[] type;
+		delete[] restrictions;
+	}
+
+	void operator=(Zone &z){
+		delete[] type;
+		type = new char[strlen(z.type) + 1];
+		strcpy(type, z.type);
+		delete[] restrictions;
+		restrictions = new char[strlen(z.restrictions) + 1];
+		strcpy(restrictions, z.restrictions);
+	}
+
+	friend ostream &operator<<(ostream &output, Zone &z){
+		output << endl;
+		output << "type: " << z.type << endl;
+		output << "restrictions: " << z.restrictions << endl;
+		return output;
+	}
+
+	friend ifstream &operator>>(ifstream &input, Zone &z){
+		delete[] z.type;
+		delete[] z.restrictions;
+
+		char buffer[50];
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("type: "));
+		z.type = new char[strlen(buffer) + 1];
+		strcpy(z.type, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("restrictions: "));
+		z.restrictions = new char[strlen(buffer) + 1];
+		strcpy(z.restrictions, buffer);
+
+		return input;
+	}
+
+	char *getType(){
+		return type;
+	}
+
+	char *getRestrictions(){
+		return restrictions;
+	}
+
+	void setType(char *p){
+		if (p){
+			delete[] type;
+			type = new char[strlen(p) + 1];
+			strcpy(type, p);
+		}
+	}
+
+	void setRestrictions(char *p){
+		if (p){
+			delete[] restrictions;
+			restrictions = new char[strlen(p) + 1];
+			strcpy(restrictions, p);
+		}
+	}
+
+	virtual void print(){
+		cout << endl;
+		cout << "type: " << type << endl;
+		cout << "restrictions: " << restrictions << endl;
+	}
+};
+
+class Circle :public Zone{
+private:
+	typedef struct{
+		double long latitude, longitude;
+	} point;
+	point center;
+	double radius;
+public:
+	Circle() :Zone(){
+		center.latitude = 0;
+		center.longitude = 0;
+		radius = 0;
+	}
+
+	Circle(char *p1, char *p2, double long p3, double long p4, double p5) :Zone(p1, p2){
+		center.latitude = p3;
+		center.longitude = p4;
+		radius = p5;
+	}
+
+	Circle(const Circle &c) :Zone(c){
+		center.latitude = c.center.latitude;
+		center.longitude = c.center.longitude;
+		radius = c.radius;
+	}
+
+	~Circle(){
+	}
+
+	void operator=(Circle &c){
+		delete[] type;
+		type = new char[strlen(c.type) + 1];
+		strcpy(type, c.type);
+		delete[] restrictions;
+		restrictions = new char[strlen(c.restrictions) + 1];
+		strcpy(restrictions, c.restrictions);
+		center.latitude = c.center.latitude;
+		center.longitude = c.center.longitude;
+		radius = c.radius;
+	}
+
+	friend ostream &operator<<(ostream &output, Circle &c){
+		output << "type: " << c.type << endl;
+		output << "restrictions: " << c.restrictions << endl;
+		output << "point: " << c.center.latitude << "; " << c.center.longitude << endl;
+		output << "radius: " << c.radius << "km" << endl;
+		return output;
+	}
+
+	friend ifstream &operator>>(ifstream &input, Circle &c){
+		delete[] c.type;
+		delete[] c.restrictions;
+
+		char buffer[50], *pch;
+		double long i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("type: "));
+		c.type = new char[strlen(buffer) + 1];
+		strcpy(c.type, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("restrictions: "));
+		c.restrictions = new char[strlen(buffer) + 1];
+		strcpy(c.restrictions, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("point: "));
+		pch = strtok(buffer, ";");
+		i = atof(pch);
+		c.center.latitude = i;
+
+		pch = strtok(NULL, "\n");
+		i = atof(pch);
+		c.center.longitude = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("radius: "));
+		i = atoi(buffer);
+		c.radius = i;
+
+		return input;
+	}
+
+	friend istream &operator>>(istream &input, Circle &c){
+		delete[] c.type;
+		delete[] c.restrictions;
+
+		char buffer[50], *pch;
+		double long i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("type: "));
+		c.type = new char[strlen(buffer) + 1];
+		strcpy(c.type, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("restrictions: "));
+		c.restrictions = new char[strlen(buffer) + 1];
+		strcpy(c.restrictions, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("point: "));
+		pch = strtok(buffer, ";");
+		i = atof(pch);
+		c.center.latitude = i;
+
+		pch = strtok(NULL, "\n");
+		i = atof(pch);
+		c.center.longitude = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("radius: "));
+		i = atoi(buffer);
+		c.radius = i;
+
+		return input;
+	}
+
+	point getCenter(){
+		return center;
+	}
+
+	double getRadius(){
+		return radius;
+	}
+
+	void setCenter(double long p1, double long p2){
+		center.latitude = p1;
+		center.longitude = p2;
+	}
+
+	void setRadius(double p){
+		if (p >= 0)
+			radius = p;
+	}
+
+	virtual void print(){
+		cout << "type: " << type << endl;
+		cout << "restrictions: " << restrictions << endl;
+		cout << "point: " << center.latitude << "; " << center.longitude << endl;
+		cout << "radius: " << radius << "km" << endl;
+	}
+
+	static bool isInsideCircle(Location l, Circle c){
+		if (pow((l.latitude - c.center.latitude), 2) + pow((l.longitude - c.center.longitude), 2) <= pow(c.radius / 111, 2)) return true;
+		return false;
+	}
+
+	Circle operator+(int p){
+		Circle temp = *this;
+		temp.radius += p;
+		return temp;
+	}
+
+	Circle operator-(int p){
+		Circle temp = *this;
+		temp.radius -= p;
+		return temp;
+	}
+
+	Circle operator*(int p){
+		Circle temp = *this;
+		temp.radius *= p;
+		return temp;
+	}
+
+	Circle operator/(int p){
+		Circle temp = *this;
+		temp.radius /= p;
+		return temp;
+	}
+
+	Circle operator+=(int p){
+		this->radius += p;
+		return *this;
+	}
+
+	Circle operator-=(int p){
+		this->radius -= p;
+		return *this;
+	}
+
+	Circle operator*=(int p){
+		this->radius *= p;
+		return *this;
+	}
+
+	Circle operator/=(int p){
+		this->radius /= p;
+		return *this;
+	}
+
+	Circle operator++(){
+		radius++;
+		return *this;
+	}
+
+	Circle operator++(int){
+		Circle temp = *this;
+		radius++;
+		return temp;
+	}
+
+	Circle operator--(){
+		radius--;
+		return *this;
+	}
+
+	Circle operator--(int){
+		Circle temp = *this;
+		radius--;
+		return temp;
+	}
+
+	Circle operator()(point p1, double p2){
+		Circle c;
+		c.center.latitude = p1.latitude;
+		c.center.longitude = p1.longitude;
+		c.radius = p2;
+		return c;
+	}
+};
+
+class Rectangle :public Zone{
+private:
+	typedef struct{
+		double long latitude, longitude;
+	} point;
+	point left_up_corner, right_down_corner;
+public:
+	Rectangle() :Zone(){
+		left_up_corner.latitude = 0;
+		left_up_corner.longitude = 0;
+		right_down_corner.latitude = 0;
+		right_down_corner.longitude = 0;
+	}
+
+	Rectangle(char *p1, char *p2, double long p3, double long p4, double long p5, double long p6) :Zone(p1, p2){
+		left_up_corner.latitude = p3;
+		left_up_corner.longitude = p4;
+		right_down_corner.latitude = p5;
+		right_down_corner.longitude = p6;
+	}
+
+	Rectangle(const Rectangle &r) :Zone(r){
+		left_up_corner.latitude = r.left_up_corner.latitude;
+		left_up_corner.longitude = r.left_up_corner.longitude;
+		right_down_corner.latitude = r.right_down_corner.latitude;
+		right_down_corner.longitude = r.right_down_corner.longitude;
+	}
+
+	~Rectangle(){
+	}
+
+	void operator=(Rectangle &r){
+		delete[] type;
+		type = new char[strlen(r.type) + 1];
+		strcpy(type, r.type);
+		delete[] restrictions;
+		restrictions = new char[strlen(r.restrictions) + 1];
+		strcpy(restrictions, r.restrictions);
+		left_up_corner.latitude = r.left_up_corner.latitude;
+		left_up_corner.longitude = r.left_up_corner.longitude;
+		right_down_corner.latitude = r.right_down_corner.latitude;
+		right_down_corner.longitude = r.right_down_corner.longitude;
+	}
+
+	friend ostream &operator<<(ostream &output, Rectangle &r){
+		output << "type: " << r.type << endl;
+		output << "restrictions: " << r.restrictions << endl;
+		output << "left_up_corner: " << r.left_up_corner.latitude << "; " << r.left_up_corner.longitude << endl;
+		output << "right_down_corner: " << r.right_down_corner.latitude << "; " << r.right_down_corner.longitude << endl;
+		return output;
+	}
+
+	friend ifstream &operator>>(ifstream &input, Rectangle &r){
+		delete[] r.type;
+		delete[] r.restrictions;
+
+		char buffer[50], *pch;
+		double long i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("type: "));
+		r.type = new char[strlen(buffer) + 1];
+		strcpy(r.type, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("restrictions: "));
+		r.restrictions = new char[strlen(buffer) + 1];
+		strcpy(r.restrictions, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("left_up_corner: "));
+		pch = strtok(buffer, ";");
+		i = atof(pch);
+		r.left_up_corner.latitude = i;
+
+		pch = strtok(NULL, "\n");
+		i = atof(pch);
+		r.left_up_corner.longitude = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("right_down_corner: "));
+		pch = strtok(buffer, ";");
+		i = atof(pch);
+		r.right_down_corner.latitude = i;
+
+		pch = strtok(NULL, "\n");
+		i = atof(pch);
+		r.right_down_corner.longitude = i;
+
+		return input;
+	}
+
+	friend istream &operator>>(istream &input, Rectangle &r){
+		delete[] r.type;
+		delete[] r.restrictions;
+
+		char buffer[50], *pch;
+		double long i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("type: "));
+		r.type = new char[strlen(buffer) + 1];
+		strcpy(r.type, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("restrictions: "));
+		r.restrictions = new char[strlen(buffer) + 1];
+		strcpy(r.restrictions, buffer);
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("left_up_corner: "));
+		pch = strtok(buffer, ";");
+		i = atof(pch);
+		r.left_up_corner.latitude = i;
+
+		pch = strtok(NULL, "\n");
+		i = atof(pch);
+		r.left_up_corner.longitude = i;
+
+		input.getline(buffer, 50);
+		strcpy(buffer, buffer + strlen("right_down_corner: "));
+		pch = strtok(buffer, ";");
+		i = atof(pch);
+		r.right_down_corner.latitude = i;
+
+		pch = strtok(NULL, "\n");
+		i = atof(pch);
+		r.right_down_corner.longitude = i;
+
+		return input;
+	}
+
+	point getLeftUpCorner(){
+		return left_up_corner;
+	}
+
+	point getRightDownCorner(){
+		return right_down_corner;
+	}
+
+	void setLeftUpCorner(double long p1, double long p2){
+		left_up_corner.latitude = p1;
+		left_up_corner.longitude = p2;
+	}
+
+	void setRightDownCorner(double long p1, double long p2){
+		right_down_corner.latitude = p1;
+		right_down_corner.longitude = p2;
+	}
+
+	virtual void print(){
+		cout << endl;
+		cout << "type: " << type << endl;
+		cout << "restrictions: " << restrictions << endl;
+		cout << "left_up_corner: " << left_up_corner.latitude << "; " << left_up_corner.longitude << endl;
+		cout << "right_down_corner: " << right_down_corner.latitude << "; " << right_down_corner.longitude << endl;
+	}
+
+	static bool isInsideRectangle(Location l, Rectangle r){ //a,d; c,b -> b=left_up_corner.latitude; a=left_up_corner.longitude; d=right_down_corner.latitude; c=right_down_corner.longitude;
+		if ((l.longitude >= r.left_up_corner.longitude) && (l.longitude <= r.right_down_corner.longitude) &&
+			(l.latitude >= r.right_down_corner.latitude) && (l.latitude <= r.left_up_corner.latitude)) return true;
+		else return false;
+	}
+
+	Rectangle operator+(const Rectangle &r){ //nu aduna neaparat doua dreptunghiuri; mareste dimensiunea unui dreptunghi
+		Rectangle temp = *this;
+		temp.left_up_corner.latitude += r.left_up_corner.latitude;
+		temp.left_up_corner.longitude += r.left_up_corner.longitude;
+		temp.right_down_corner.latitude += r.right_down_corner.latitude;
+		temp.right_down_corner.longitude += r.right_down_corner.longitude;
+		return temp;
+	}
+
+	Rectangle operator-(const Rectangle &r){ //nu scade neaparat doua dreptunghiuri; micsoreaza dimensiunea unui dreptunghi
+		Rectangle temp = *this;
+		temp.left_up_corner.latitude -= r.left_up_corner.latitude;
+		temp.left_up_corner.longitude -= r.left_up_corner.longitude;
+		temp.right_down_corner.latitude -= r.right_down_corner.latitude;
+		temp.right_down_corner.longitude -= r.right_down_corner.longitude;
+		return temp;
+	}
+
+	Rectangle operator+=(const Rectangle &r){ //nu aduna neaparat doua dreptunghiuri; mareste dimensiunea unui dreptunghi
+		this->left_up_corner.latitude += r.left_up_corner.latitude;
+		this->left_up_corner.longitude += r.left_up_corner.longitude;
+		this->right_down_corner.latitude += r.right_down_corner.latitude;
+		this->right_down_corner.longitude += r.right_down_corner.longitude;
+		return *this;
+	}
+
+	Rectangle operator-=(const Rectangle &r){ //nu scade neaparat doua dreptunghiuri; micsoreaza dimensiunea unui dreptunghi
+		this->left_up_corner.latitude -= r.left_up_corner.latitude;
+		this->left_up_corner.longitude -= r.left_up_corner.longitude;
+		this->right_down_corner.latitude -= r.right_down_corner.latitude;
+		this->right_down_corner.longitude -= r.right_down_corner.longitude;
+		return *this;
+	}
+
+	Rectangle operator++(){
+		left_up_corner.latitude++;
+		left_up_corner.longitude--;
+		right_down_corner.latitude--;
+		right_down_corner.longitude++;
+		return *this;
+	}
+
+	Rectangle operator++(int){
+		Rectangle temp = *this;
+		left_up_corner.latitude++;
+		left_up_corner.longitude--;
+		right_down_corner.latitude--;
+		right_down_corner.longitude++;
+		return temp;
+	}
+
+	Rectangle operator--(){
+		left_up_corner.latitude--;
+		left_up_corner.longitude++;
+		right_down_corner.latitude++;
+		right_down_corner.longitude--;
+		return *this;
+	}
+
+	Rectangle operator--(int){
+		Rectangle temp = *this;
+		left_up_corner.latitude--;
+		left_up_corner.longitude++;
+		right_down_corner.latitude++;
+		right_down_corner.longitude--;
+		return temp;
+	}
+
+	Rectangle operator()(point p1, point p2){
+		Rectangle r;
+		r.left_up_corner.latitude = p1.latitude;
+		r.left_up_corner.longitude = p1.longitude;
+		r.right_down_corner.latitude = p2.latitude;
+		r.right_down_corner.longitude = p2.longitude;
+	}
+};
+
+class Status{
+private:
+	bool status;
+	char *str;
+public:
+	Status(){
+		status = false;
+		str = new char[strlen("Automobile left the zone") + 1];
+		strcpy(str, "Automobile left the zone");
+	}
+
+	Status(bool p){
+		status = p;
+		if (p){
+			str = new char[strlen("Automobile entered the zone") + 1];
+			strcpy(str, "Automobile entered the zone");
+		}
+		else{
+			str = new char[strlen("Automobile left the zone") + 1];
+			strcpy(str, "Automobile left the zone");
+		}
+	}
+
+	Status(const Status &s){
+		status = s.status;
+		if (s.status){
+			str = new char[strlen("Automobile entered the zone") + 1];
+			strcpy(str, "Automobile entered the zone");
+		}
+		else{
+			str = new char[strlen("Automobile left the zone") + 1];
+			strcpy(str, "Automobile left the zone");
+		}
+	}
+
+	~Status(){
+		delete[] str;
+	}
+
+	void operator=(Status &s){
+		status = s.status;
+		delete[] str;
+		if (s.status){
+			str = new char[strlen("Automobile entered the zone") + 1];
+			strcpy(str, "Automobile entered the zone");
+		}
+		else{
+			str = new char[strlen("Automobile left the zone") + 1];
+			strcpy(str, "Automobile left the zone");
+		}
+	}
+
+	friend ostream &operator<<(ostream &output, Status &s){
+		output << endl;
+		if (s.status) output << "Automobile is in the zone" << endl;
+		else output << "Automobile is not in the zone" << endl;
+		return output;
+	}
+
+	friend istream &operator>>(istream &input, Status &s){
+		cout << "Change the status for automobile? (Y/N)" << endl;
+		char c = getc(stdin);
+		if (c == 'Y' || c == 'y'){
+			cout << endl << "Enter the new status(1 - in the zone; 0 - not in the zone): ";
+			input >> s.status;
+		}
+		return input;
+	}
+
+	bool getStatus(){
+		return status;
+	}
+
+	void setStatus(bool p){
+		if (p == true || p == false)
+			status = p;
+	}
+
+	void print(){
+		cout << str << endl;
+	}
+
+	bool operator!(){
+		if (!status) return true;
+		else return false;
+	}
+};
+
+class GreenDriving{
+private:
+	float g_g_avg, g_r_avgu, d_g_avg, d_r_avgu, h_g_avg, h_r_avgu;
+public:
+	GreenDriving(){
+		g_g_avg = g_r_avgu = d_g_avg = d_r_avgu = h_g_avg = h_r_avgu = 0;
+	}
+
+	GreenDriving(float p1, float p2, float p3, float p4, float p5, float p6, float p7, float p8, float p9, float p10, float p11, float p12){
+		g_g_avg = p2;
+		g_r_avgu = p3;
+		d_g_avg = p6;
+		d_r_avgu = p7;
+		h_g_avg = p10;
+		h_r_avgu = p11;
+	}
+
+	GreenDriving(const GreenDriving &gd){
+		g_g_avg = gd.g_g_avg;
+		g_r_avgu = gd.g_r_avgu;
+		d_g_avg = gd.d_g_avg;
+		d_r_avgu = gd.d_r_avgu;
+		h_g_avg = gd.h_g_avg;
+		h_r_avgu = gd.h_r_avgu;
+	}
+
+	~GreenDriving(){
+	}
+
+	void operator=(GreenDriving &gd){
+		g_g_avg = gd.g_g_avg;
+		g_r_avgu = gd.g_r_avgu;
+		d_g_avg = gd.d_g_avg;
+		d_r_avgu = gd.d_r_avgu;
+		h_g_avg = gd.h_g_avg;
+		h_r_avgu = gd.h_r_avgu;
+	}
+
+	friend ostream &operator<<(ostream &output, GreenDriving &gd){
+		output << "Your model is defined as following: " << endl;
+		output << "gasoline:green:avg: " << gd.g_g_avg << endl;
+		output << "gasoline:red:avg_urban: " << gd.g_r_avgu << endl;
+		output << "diesel:green:avg: " << gd.d_g_avg << endl;
+		output << "diesel:red:avg_urban: " << gd.d_r_avgu << endl;
+		output << "hybrid:green:avg:" << gd.h_g_avg << endl;
+		output << "hybrid:red:avg_urban: " << gd.h_r_avgu << endl;
+		return output;
+	}
+
+	friend istream &operator>>(istream &input, GreenDriving &gd){
+		cout << "Introduce the following consumptions: " << endl;
+		cout << "gasoline:green:avg: "; input >> gd.g_g_avg;
+		cout << "gasoline:red:avg_urban: "; input >> gd.g_r_avgu;
+		cout << "diesel:green:avg: "; input >> gd.d_g_avg;
+		cout << "diesel:red:avg_urban: "; input >> gd.d_r_avgu;
+		cout << "hybrid:green:avg:"; input >> gd.h_g_avg;
+		cout << "hybrid:red:avg_urban: "; input >> gd.h_r_avgu;
+		return input;
+	}
+
+	float getGGAvg(){
+		return g_g_avg;
+	}
+
+	float getGRAvgU(){
+		return g_r_avgu;
+	}
+
+	float getDGAvg(){
+		return d_g_avg;
+	}
+
+	float getDRAvgU(){
+		return d_r_avgu;
+	}
+
+	float getHGAvg(){
+		return h_g_avg;
+	}
+
+	float getHRAvgU(){
+		return h_r_avgu;
+	}
+
+	void setGGAvg(float p){
+		if (p >= 0)
+			g_g_avg = p;
+	}
+
+	void setGRAvgU(float p){
+		if (p >= 0)
+			g_r_avgu = p;
+	}
+
+	void setDGAvg(float p){
+		if (p >= 0)
+			d_g_avg = p;
+	}
+
+	void setDRAvgU(float p){
+		if (p >= 0)
+			d_r_avgu = p;
+	}
+
+	void getHGAvg(float p){
+		if (p >= 0)
+			h_g_avg = p;
+	}
+
+	void getHRAvgU(float p){
+		if (p >= 0)
+			h_r_avgu = p;
+	}
+
+	bool isGreenDriving(Automobile a, Zone z){
+		if (strcmp(a.getEngine(), "gasoline") == 0){
+			if (strcmp(z.getRestrictions(), "red") == 0){
+				if (a.getAvgConsumptionUrban() < g_r_avgu)
+					return true;
+				else return false;
+			}
+			else if (strcmp(z.getRestrictions(), "green") == 0){
+				if (a.getAvgConsumption() < g_g_avg)
+					return true;
+				else return false;
+			}
+		}
+		else if (strcmp(a.getEngine(), "diesel") == 0){
+			if (strcmp(z.getRestrictions(), "red") == 0){
+				if (a.getAvgConsumptionUrban() < d_r_avgu)
+					return true;
+				else return false;
+			}
+			else if (strcmp(z.getRestrictions(), "green") == 0){
+				if (a.getAvgConsumption() < d_g_avg)
+					return true;
+				else return false;
+			}
+		}
+		else if (strcmp(a.getEngine(), "hybrid") == 0){
+			if (strcmp(z.getRestrictions(), "red") == 0){
+				if (a.getAvgConsumptionUrban() < h_r_avgu)
+					return true;
+				else return false;
+			}
+			else if (strcmp(z.getRestrictions(), "green") == 0){
+				if (a.getAvgConsumption() < h_g_avg)
+					return true;
+				else return false;
+			}
+		}
+		cout << "Model not properly defined" << endl;
+		return false;
+	}
+};
+
+class Input{
+public:
+	static int getFiles(char *_geofence, char *_telematics, char *_auto, vector<Circle> &v1, vector<Rectangle> &v2, vector<Location> &v3, vector<Automobile> &v4){
+		ifstream geofencein(_geofence, ios_base::in);
+		ifstream telematicsin(_telematics, ios_base::in);
+		ifstream autoin(_auto, ios_base::in);
+
+		if (!(geofencein && telematicsin && autoin)) {
+			cout << "Error opening files. Location may be invalid" << endl;
+			return 1;
+		}
+		else{
+			int count = 0, i = 0;
+			char str[50];
+			Circle c;
+			Rectangle r;
+			Automobile a;
+			Location l;
+
+			cout << "Press enter key to start reading data from \"geofence.txt\" ";
+			cin.get();
+
+			while (!geofencein.eof()){
+				int pos = geofencein.tellg();
+				geofencein.getline(str, 50);
+				geofencein.seekg(pos);
+				strcpy(str, str + strlen("type: "));
+				if (strcmp(str, "circle") == 0){
+					geofencein >> c;
+					v1.push_back(c);
+					i++;
+				}
+				else if (strcmp(str, "rectangle") == 0){
+					geofencein >> r;
+					v2.push_back(r);
+					i++;
+				}
+				else {
+					cout << "Error reading file. Type not recognized" << endl;
+					return 1;
+				}
+			}
+
+			cout << "Press enter key to start reading data from \"auto.txt\" and \"telematics.txt\" ";
+			cin.get();
+			system("cls");
+			cout << "Reading files. Please wait.";
+
+			while (!autoin.eof()){
+				autoin >> a;
+				v4.push_back(a);
+			}
+
+			while (!telematicsin.eof()){
+				telematicsin >> l;
+				v3.push_back(l);
+				count += 1;
+				if (count % 5000 == 0) cout << ".";
+				if (count % 15000 == 0){
+					system("cls");
+					cout << "Reading files. Please wait.";
+				}
+			}
+		}
+		geofencein.close();
+		telematicsin.close();
+		autoin.close();
+
+		system("cls");
+
+		return 0;
+	}
+};
+
+class Output_bin{
+public:
+	static int putFiles(char *_geofence, char *_telematics, char *_auto, vector<Circle> &v1, vector<Rectangle> &v2, vector<Location> &v3, vector<Automobile> &v4){
+		ofstream geofenceout(_geofence, ios::binary);
+		ofstream telematicsout(_telematics, ios::binary);
+		ofstream autoout(_auto, ios::binary);
+
+		for (int i = 0; i < v1.size(); i++)
+			geofenceout.write((char*)&v1[i], sizeof(Circle));
+
+		for (int i = 0; i < v2.size(); i++)
+			geofenceout.write((char*)&v2[i], sizeof(Rectangle));
+
+		for (int i = 0; i < v4.size(); i++)
+			autoout.write((char*)&v4[i], sizeof(Automobile));
+
+		for (int i = 0; i < v3.size(); i++)
+			telematicsout.write((char*)&v3[i], sizeof(Location));
+
+		cout << "Files created. Location is ";
+		system("cd");
+		cout << endl;
+
+		geofenceout.close();
+		telematicsout.close();
+		autoout.close();
+		return 0;
+	}
+};
+
+class UI{
+public:
+	static void getReport(vector<Circle> &v1, vector<Rectangle> &v2, vector<Location> &v3, vector<Automobile> &v4){
+		char str[50], c;
+
+		fflush(stdin);
+		cout << "Introduce a type of report(automobile list, geofence objects, number of telematic locations, distance, average speed, fuel, time, geofence): ";
+		cin.getline(str, 50);
+
+		while (strcmp(str, "automobile list") != 0 && strcmp(str, "geofence objects") != 0 && strcmp(str, "number of telematic locations") != 0 && strcmp(str, "distance") != 0
+			&& strcmp(str, "average speed") != 0 && strcmp(str, "fuel") != 0 && strcmp(str, "time") != 0 && strcmp(str, "geofence") != 0) {
+			fflush(stdin);
+			cout << "Introduce a type of report(automobile list, geofence objects, number of telematic locations, distance, average speed, fuel, time, geofence): ";
+			cin.getline(str, 50);
+		}
+
+		fflush(stdin);
+		cout << "Do you want to generate this report in a text file? (Y/N) ";
+		cin.get(c);
+		while (c != 'y' && c != 'Y' && c != 'n' && c != 'N') {
+			fflush(stdin);
+			cout << "Do you want to generate this report in a text file? (Y/N) ";
+			cin.get(c);
+		}
+
+		if (c == 'N' || c == 'n') {
+			cout << endl;
+
+			if (strcmp(str, "automobile list") == 0){
+				for (int i = 0; i < v4.size(); i++)
+					cout << v4[i];
+				cout << endl;
+			}
+			else if (strcmp(str, "geofence objects") == 0) {
+				for (int i = 0; i < v1.size(); i++)
+					cout << v1[i];
+				for (int i = 0; i < v2.size(); i++)
+					cout << v2[i];
+				cout << endl;
+			}
+			else if (strcmp(str, "number of telematic locations") == 0)
+				cout << "File contains " << v3.size() << " telematic locations" << endl;
+			else if (strcmp(str, "distance") == 0) {
+				int i;
+				double long d = 0;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()){
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 1; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0 && strcmp(v3[k - 1].getId(), v4[i].getId()) == 0) {
+					d += sqrt(pow((v3[k].getLatitude() - v3[k - 1].getLatitude()), 2) +
+						pow((v3[k].getLongitude() - v3[k - 1].getLongitude()), 2));
+				}
+				cout << "Distance: " << (double)(d * 111) << " km" << endl;
+			}
+			else if (strcmp(str, "average speed") == 0) {
+				int i, nr = 0;
+				double long d = 0;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 0; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0) {
+					d += v3[k].getVelocity();
+					nr++;
+				}
+				cout << "Average speed: " << (double)(d / nr) << " km/h" << endl;
+			}
+			else if (strcmp(str, "fuel") == 0) {
+				int i, nr = 0;
+				double long d = 0, s = 0;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 1; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0 && strcmp(v3[k - 1].getId(), v4[i].getId()) == 0) {
+					d += sqrt(pow((v3[k].getLatitude() - v3[k - 1].getLatitude()), 2) +
+						pow((v3[k].getLongitude() - v3[k - 1].getLongitude()), 2));
+					for (int p = 0; p < v1.size(); p++)
+					if (Circle::isInsideCircle(v3[k - 1], v1[p])) {
+						s += v4[i].getAvgConsumptionUrban();
+						nr++;
+					}
+					for (int p = 0; p < v2.size(); p++)
+					if (Rectangle::isInsideRectangle(v3[k - 1], v2[p])) {
+						s += v4[i].getAvgConsumptionUrban();
+						nr++;
+					}
+				}
+				s = (double)s / nr;
+				cout << "Fuel: " << (double)(d * 111 * s / 100) << "l" << endl;
+			}
+			else if (strcmp(str, "time") == 0) {
+				int i, k = 0;
+				int start = 0, end = 0;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 1; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0 && strcmp(v3[k - 1].getId(), v4[i].getId()) == 0) {
+					if (start = 0) start = k;
+					end = k;
+				}
+				cout << "Time (from start to end, measured in seconds): " << (time_t)difftime(v3[end].getTime(), v3[start].getTime()) << endl;
+			}
+			else {
+				int i;
+				Status s(false);
+				vector<Status> status;
+
+				GreenDriving gd;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				cout << "Define a GreenDriving model: " << endl;
+				cin >> gd;
+
+				status.clear();
+
+				for (int i = 0; i < v4.size(); i++)
+					status.push_back(s);
+
+				for (int p = 0; p < v1.size(); p++)
+				for (int k = 0; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0) {
+					if (Circle::isInsideCircle(v3[k], v1[p])) {
+						if (status[i].getStatus() == false) {
+							status[i].setStatus(true);
+							std::cout << "Automobile " << v4[i].getId() << " entered circle " << p + 1 << " at " << v3[k].convertTimeToDate();
+							if (gd.isGreenDriving(v4[i], v1[p]))
+								std::cout << "Eco status: is green driving" << endl;
+							else std::cout << "Eco status: is not green driving" << endl;
+						}
+					}
+					else {
+						if (status[i].getStatus() == true) {
+							status[i].setStatus(false);
+							std::cout << "Automobile " << v4[i].getId() << " left the zone at " << v3[k].convertTimeToDate() << endl;
+						}
+					}
+				}
+
+				status.clear();
+
+				for (int i = 0; i < v4.size(); i++)
+					status.push_back(s);
+
+				for (int p = 0; p < v2.size(); p++)
+				for (int k = 0; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0) {
+					if (Rectangle::isInsideRectangle(v3[k], v2[p])) {
+						if (status[i].getStatus() == false) {
+							status[i].setStatus(true);
+							std::cout << "Automobile " << v4[i].getId() << " entered rectangle " << p + 1 << " at " << v3[k].convertTimeToDate();
+							if (gd.isGreenDriving(v4[i], v1[p]))
+								std::cout << "Eco status: is green driving" << endl;
+							else std::cout << "Eco status: is not green driving" << endl;
+						}
+					}
+					else {
+						if (status[i].getStatus() == true) {
+							status[i].setStatus(false);
+							std::cout << "Automobile " << v4[i].getId() << " left the zone at " << v3[k].convertTimeToDate() << endl;
+						}
+					}
+				}
+			}
+		}
+		else {
+			ofstream fout("report.txt", ios::app);
+
+			time_t timer;
+			time(&timer);
+
+			fout << "Report type: " << str << endl;
+			fout << "Report time: " << ctime(&timer) << endl;
+
+			if (strcmp(str, "automobile list") == 0){
+				for (int i = 0; i < v4.size(); i++)
+					fout << v4[i];
+			}
+			else if (strcmp(str, "geofence objects") == 0){
+				for (int i = 0; i < v1.size(); i++)
+					fout << v1[i];
+				for (int i = 0; i < v2.size(); i++)
+					fout << v2[i];
+			}
+			else if (strcmp(str, "number of telematic locations") == 0)
+				fout << "File contains " << v3.size() << " telematic locations" << endl;
+			else if (strcmp(str, "distance") == 0){
+				int i;
+				double long d = 0;
+				char str[10];
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()){
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 1; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0 && strcmp(v3[k - 1].getId(), v4[i].getId()) == 0) {
+					d += sqrt(pow((v3[k].getLatitude() - v3[k - 1].getLatitude()), 2) +
+						pow((v3[k].getLongitude() - v3[k - 1].getLongitude()), 2));
+				}
+				fout << "Distance: " << (double)(d * 111) << " km" << endl;
+			}
+			else if (strcmp(str, "average speed") == 0){
+				int i, nr = 0;
+				double long d = 0;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 0; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0){
+					d += v3[k].getVelocity();
+					nr++;
+				}
+				fout << "Average speed: " << (double)(d / nr) << " km/h" << endl;
+			}
+			else if (strcmp(str, "fuel") == 0) {
+				int i, nr = 0;
+				double long d = 0, s = 0;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 1; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0 && strcmp(v3[k - 1].getId(), v4[i].getId()) == 0) {
+					d += sqrt(pow((v3[k].getLatitude() - v3[k - 1].getLatitude()), 2) +
+						pow((v3[k].getLongitude() - v3[k - 1].getLongitude()), 2));
+					for (int p = 0; p < v1.size(); p++)
+					if (Circle::isInsideCircle(v3[k - 1], v1[p])) {
+						s += v4[i].getAvgConsumptionUrban();
+						nr++;
+					}
+					for (int p = 0; p < v2.size(); p++)
+					if (Rectangle::isInsideRectangle(v3[k - 1], v2[p])) {
+						s += v4[i].getAvgConsumptionUrban();
+						nr++;
+					}
+				}
+				s = (double)s / nr;
+				fout << "Fuel: " << (double)(d * 111 * s / 100) << "l" << endl;
+			}
+			else if (strcmp(str, "time") == 0) {
+				int i, k = 0;
+				int start = 0, end = 0;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				for (int k = 1; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0 && strcmp(v3[k - 1].getId(), v4[i].getId()) == 0) {
+					if (start = 0) start = k;
+					end = k;
+				}
+				fout << "Time (from start to end, measured in seconds): " << (time_t)difftime(v3[end].getTime(), v3[start].getTime()) << endl;
+			}
+			else {
+				int i;
+				Status s(false);
+				vector<Status> status;
+
+				GreenDriving gd;
+
+				fflush(stdin);
+				cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+				cin >> i;
+				while (i <= 0 || i > v4.size()) {
+					fflush(stdin);
+					cout << "Select an automobile (" << v4.size() << " automobiles available): ";
+					cin >> i;
+				}
+				i--;
+
+				cout << "Define a GreenDriving model: " << endl;
+				cin >> gd;
+
+				status.clear();
+
+				for (int i = 0; i < v4.size(); i++)
+					status.push_back(s);
+
+				for (int p = 0; p < v1.size(); p++)
+				for (int k = 0; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0) {
+					if (Circle::isInsideCircle(v3[k], v1[p])) {
+						if (status[i].getStatus() == false) {
+							status[i].setStatus(true);
+							fout << "Automobile " << v4[i].getId() << " entered circle " << p + 1 << " at " << v3[k].convertTimeToDate();
+							if (gd.isGreenDriving(v4[i], v1[p]))
+								fout << "Eco status: is green driving" << endl;
+							else fout << "Eco status: is not green driving" << endl;
+						}
+					}
+					else {
+						if (status[i].getStatus() == true) {
+							status[i].setStatus(false);
+							fout << "Automobile " << v4[i].getId() << " left the zone at " << v3[k].convertTimeToDate() << endl;
+						}
+					}
+				}
+
+				status.clear();
+
+				for (int i = 0; i < v4.size(); i++)
+					status.push_back(s);
+
+				for (int p = 0; p < v2.size(); p++)
+				for (int k = 0; k < v3.size(); k++)
+				if (strcmp(v3[k].getId(), v4[i].getId()) == 0) {
+					if (Rectangle::isInsideRectangle(v3[k], v2[p])) {
+						if (status[i].getStatus() == false) {
+							status[i].setStatus(true);
+							fout << "Automobile " << v4[i].getId() << " entered rectangle " << p + 1 << " at " << v3[k].convertTimeToDate();
+							if (gd.isGreenDriving(v4[i], v1[p]))
+								fout << "Eco status: is green driving" << endl;
+							else fout << "Eco status: is not green driving" << endl;
+						}
+					}
+					else {
+						if (status[i].getStatus() == true) {
+							status[i].setStatus(false);
+							fout << "Automobile " << v4[i].getId() << " left the zone at " << v3[k].convertTimeToDate() << endl;
+						}
+					}
+				}
+			}
+
+			fout << endl;
+
+			cout << "File is located at ";
+			system("cd");
+
+			fout.close();
+		}
+
+		fflush(stdin);
+		cout << "Do you want to generate another type of report? (Y/N) ";
+		cin.get(c);
+		while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+			fflush(stdin);
+			cout << "Do you want to generate another type of report? (Y/N) ";
+			cin.get(c);
+		}
+
+		if (c == 'Y' || c == 'y')
+			UI::getReport(v1, v2, v3, v4);
+		else{
+			fflush(stdin);
+			cout << "Press enter key to exit report utility ";
+			cin.get();
+		}
+	}
+
+	static void getFilesLocation(char *_geofence, char *_telematics, char *_auto){
+		char cd[100];
+		fflush(stdin);
+
+		cout << "Enter the location of the files containing data or press enter for default location: ";
+		cin.getline(cd, 100);
+
+		if (strlen(cd) == 0)
+			strcpy(cd, "C:\\Users\\raduparvulescu\\Desktop");
+
+		strcpy(_geofence, cd);
+		strcat(_geofence, "\\geofence.txt");
+
+		strcpy(_telematics, cd);
+		strcat(_telematics, "\\telematics.txt");
+
+		strcpy(_auto, cd);
+		strcat(_auto, "\\auto.txt");
+	}
+
+	static int loadFiles(vector<Circle> &v1, vector<Rectangle> &v2, vector<Location> &v3, vector<Automobile> &v4, char *_geofence, char *_telematics, char *_auto){
+		char c;
+		int noData;
+
+		//UI::getFilesLocation(_geofence, _telematics, _auto);
+		noData = Input::getFiles(_geofence, _telematics, _auto, v1, v2, v3, v4);
+
+		fflush(stdin);
+		cout << "Do you want to add another set of files? (Y/N) ";
+		cin.get(c);
+		while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+			fflush(stdin);
+			cout << "Do you want to add another set of files? (Y/N) ";
+			cin.get(c);
+		}
+
+		if (c == 'n' || c == 'N'){
+			if (noData == 1) {
+				cout << "No data available" << endl;
+				return 1;
+			}
+
+			fflush(stdin);
+			cout << "Do you want to modify the geofence objects? (Y/N) ";
+			cin.get(c);
+			while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+				fflush(stdin);
+				cout << "Do you want to modify the geofence objects? (Y/N) ";
+				cin.get(c);
+			}
+
+			if (c == 'n' || c == 'N')
+				UI::getReport(v1, v2, v3, v4);
+			else {
+				while (c == 'Y' || c == 'y'){
+					UI::modifyGeofence(v1, v2, _geofence);
+
+					fflush(stdin);
+					cout << "Do you want to modify the geofence objects? (Y/N) ";
+					cin.get(c);
+					while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+						fflush(stdin);
+						cout << "Do you want to modify the geofence objects? (Y/N) ";
+						cin.get(c);
+					}
+				}
+				UI::getReport(v1, v2, v3, v4);
+			}
+		}
+		else {
+			while (c == 'Y' || c == 'y'){
+				UI::getFilesLocation(_geofence, _telematics, _auto);
+				if (noData == 0) Input::getFiles(_geofence, _telematics, _auto, v1, v2, v3, v4);
+				else noData = Input::getFiles(_geofence, _telematics, _auto, v1, v2, v3, v4);
+
+				fflush(stdin);
+				cout << "Do you want to add another set of files? (Y/N) ";
+				cin.get(c);
+				while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+					fflush(stdin);
+					cout << "Do you want to add another set of files? (Y/N) ";
+					cin.get(c);
+				}
+			}
+
+			if (noData == 1) {
+				cout << "No data available" << endl;
+				return 1;
+			}
+
+			fflush(stdin);
+			cout << "Do you want to modify the geofence objects? (Y/N) ";
+			cin.get(c);
+			while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+				fflush(stdin);
+				cout << "Do you want to modify the geofence objects? (Y/N) ";
+				cin.get(c);
+			}
+
+			if (c == 'n' || c == 'N')
+				UI::getReport(v1, v2, v3, v4);
+			else {
+				while (c == 'Y' || c == 'y'){
+					UI::modifyGeofence(v1, v2, _geofence);
+
+					fflush(stdin);
+					cout << "Do you want to modify the geofence objects? (Y/N) ";
+					cin.get(c);
+					while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+						fflush(stdin);
+						cout << "Do you want to modify the geofence objects? (Y/N) ";
+						cin.get(c);
+					}
+				}
+				UI::getReport(v1, v2, v3, v4);
+			}
+		}
+
+		fflush(stdin);
+		cout << "Do you want to generate binary files? (Y/N) ";
+		cin.get(c);
+		while (c != 'y' && c != 'Y' && c != 'n' && c != 'N'){
+			fflush(stdin);
+			cout << "Do you want to generate binary files? (Y/N) ";
+			cin.get(c);
+		}
+
+		if (c == 'y' || c == 'Y')
+			Output_bin::putFiles("geofence.dat", "telematics.dat", "auto.dat", v1, v2, v3, v4);
+
+		return 0;
+	}
+
+	static void modifyGeofence(vector<Circle> &v1, vector<Rectangle> &v2, char *_geofence){
+		ofstream fout("geofence_mod.txt", ios::trunc);
+		char c, str[100];
+		int i;
+
+		fflush(stdin);
+		cout << "What operation would you like to perform on this file? (1 - remove object, 2 - add object) ";
+		cin.get(c);
+		while (c != '1' && c != '2'){
+			fflush(stdin);
+			cout << "What operation would you like to perform on this file? (1 - remove object, 2 - add object) ";
+			cin.get(c);
+		}
+
+		if (c == '1'){
+			fflush(stdin);
+			cout << "What object do you want to remove? (circle/rectangle) ";
+			cin.getline(str, 100);
+			while (strcmp(str, "circle") != 0 && strcmp(str, "rectangle") != 0) {
+				fflush(stdin);
+				cout << "What object do you want to remove? (circle/rectangle) ";
+				cin.getline(str, 100);
+			}
+
+			if (strcmp(str, "circle") == 0){
+				fflush(stdin);
+				cout << "Select an object (" << v1.size() << " objects available): ";
+				cin >> i;
+				while (i <= 0 || i > v1.size()) {
+					fflush(stdin);
+					cout << "Select an object (" << v1.size() << " objects available): ";
+					cin >> i;
+				}
+				v1.erase(v1.begin() + i - 1);
+			}
+			else {
+				fflush(stdin);
+				cout << "Select an object (" << v2.size() << " objects available): ";
+				cin >> i;
+				while (i <= 0 || i > v2.size()) {
+					fflush(stdin);
+					cout << "Select an object (" << v2.size() << " objects available): ";
+					cin >> i;
+				}
+				v2.erase(v2.begin() + i - 1);
+			}
+		}
+		else {
+			fflush(stdin);
+			cout << "What object do you want to add? (circle/rectangle) ";
+			cin.getline(str, 100);
+			while (strcmp(str, "circle") != 0 && strcmp(str, "rectangle") != 0) {
+				fflush(stdin);
+				cout << "What object do you want to add? (circle/rectangle) ";
+				cin.getline(str, 100);
+			}
+
+			if (strcmp(str, "circle") == 0) {
+				Circle c;
+				cout << "Define the zone (type, restrictions, point, radius): " << endl;
+				cin >> c;
+				v1.push_back(c);
+			}
+			else {
+				Rectangle r;
+				cout << "Define the zone (type, restrictions, left_up_corner, right_down_corner): " << endl;
+				cin >> r;
+				v2.push_back(r);
+			}
+		}
+
+		for (int k = 0; k < v1.size(); k++)
+			fout << v1[k];
+		for (int k = 0; k < v2.size(); k++)
+			fout << v2[k];
+
+		fout.close();
+	}
+};
+
+int main(int argc, char *argv[]){
+	vector<Automobile> autoVect;
+	vector<Location> locationVect;
+	vector<Circle> circleVect;
+	vector<Rectangle> rectangleVect;
+	char _geofence[100], _telematics[100], _auto[100];
+
+	time_t runningTime = time(NULL);
+
+	if (argc != 4) cout << "There must be 4 arguments (greendriving.exe geofence.txt telematics.txt auto.txt)" << endl << "Exit code: 1" << endl;
+	else {
+		strcpy(_geofence, argv[1]);
+		strcpy(_telematics, argv[2]);
+		strcpy(_auto, argv[3]);
+
+		if (UI::loadFiles(circleVect, rectangleVect, locationVect, autoVect, _geofence, _telematics, _auto) == 1) cout << "Exit code: 1" << endl;
+		else cout << "Exit code: 0" << endl;
+	}
+
+	cout << "Running time: " << difftime(time(NULL), runningTime) << " seconds" << endl;
+	cout << "Press any key ";
+
+	_getch();
+	return 0;
+}
+
+
